@@ -1,0 +1,46 @@
+{
+  "name": "auto-try-catch",
+  "version": "0.0.2",
+  "description": "auto-try-catchh",
+  "keywords": [
+    "auto-try-catch"
+  ],
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack --mode=development --progress --color --watch",
+    "build": "rm -rf dist && webpack --mode=production --config webpack.config.pro.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yanfangmin815/webapck-plugin-add-try-catch.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "author": "yanfangmin_815@163.com",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/generator": "^7.4.4",
+    "@babel/parser": "^7.4.5",
+    "@babel/traverse": "^7.4.5",
+    "babel-types": "^6.26.0",
+    "babylon": "^6.18.0",
+    "chokidar": "^3.0.1",
+    "i-mayfly": "0.0.7",
+    "lodash": "^4.17.15",
+    "react": "^16.13.0",
+    "vue-template-compiler": "^2.6.11",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "devDependencies": {
+    "babel-loader": "^8.0.6",
+    "webpack": "^4.32.2",
+    "webpack-cli": "^3.3.2"
+  },
+  "bugs": {
+    "url": "https://github.com/yanfangmin815/webapck-plugin-add-try-catch/issues"
+  },
+  "homepage": "https://github.com/yanfangmin815/webapck-plugin-add-try-catch#readme"
+}
