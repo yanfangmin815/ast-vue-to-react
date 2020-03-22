@@ -8,7 +8,8 @@ const traverse = require("@babel/traverse").default;
 const generator = require('@babel/generator').default; // https://www.babeljs.cn/docs/6.26.3/babel-types
 const t = require('babel-types');
 const _ = require('lodash');
-const { plugins, transformToReactCycle } = require('./utils/utils')
+
+const { handleJsAst } = require('./utils/handleScript')
 
 const generateCatchClause = () => {
   // param-2
@@ -90,6 +91,7 @@ class AutoTryCatch {
     this.watcher = null;
     this.compileHasError = false;
     this.pattern = ['.vue']
+    this.jsAst = null
   }
 
   getFile(paths) {
@@ -182,35 +184,10 @@ class AutoTryCatch {
 
   handleTraverse(ast='', filePath='') {
       let isChanged = true
-      let _this = this
-      // console.log(ast, '????????????????????')
-      // traverse(ast, {
-      //   ArrowFunctionExpression(path) {
-      //     isChanged = _this.getIsHandleAst(path)
-      //   },
-      //   FunctionDeclaration(path) {
-      //     isChanged = _this.getIsHandleAst(path)
-      //   },
-      //   FunctionExpression(path) {
-      //     isChanged = _this.getIsHandleAst(path)
-      //   },
-      //   DebuggerStatement(path) { // 判断是否有debugger
-      //     isChanged = true
-      //     path.remove()
-      //   }
-      // })
       // 如果不符合条件 则不添加try...catch
       if (isChanged) {
         this.handleAst(ast, filePath)
       }
-  }
-
-  getIsHandleAst(path) {
-    const types = path.node.body.body.map((item, index) => {
-      return item.type
-    })
-    return (path.node.body.body.length > 1 && types.includes('TryStatement')) 
-            || (path.node.body.body.length && !types.includes('TryStatement'))
   }
 
   getAst(filename) {
@@ -235,55 +212,22 @@ class AutoTryCatch {
 
   autoWriteFileSync(ast='', filePath='') {
       const config = {
-        // quotes: 'single', 
+        quotes: 'single', 
         retainLines: false, 
         compact: false,
         concise: false
       }
       // 设置输出格式
-      // console.log(ast, '??????????')
-
       const output = generator(ast, config);
+      console.log(output.code, '??????????')
+
       // fs.writeFileSync(filePath, output.code);
   }
 
   handleAst(ast, filePath) {
-    let _this = this
-    traverse(ast, {
-        Program: {
-          enter(path) {
+    this.jsAst = handleJsAst(ast, filePath, this.autoWriteFileSync)
+    // 处理template
 
-          },
-          exit() {
-            // console.log(ast.program.body[2].declaration.properties[0], '????????????')
-            _this.autoWriteFileSync(ast, filePath)
-          }
-      },
-      ImportDeclaration(path) {
-        ast.program.body.unshift(path.node)
-        path.remove()
-      },
-      ObjectMethod(path) {
-        const keyName = path.node.key.name
-        const nodeBody = path.node.body
-        const nodeParams = path.node.params
-        let classProperty = null
-        // 如果为普通函数
-        if(!plugins[keyName]) {
-          // 转为箭头函数
-          classProperty = t.classProperty(t.identifier(keyName),
-                    t.arrowFunctionExpression(nodeParams, nodeBody))
-          path.replaceWith(classProperty)
-        }
-        // 如果为生命周期函数
-        if (plugins[keyName]) {
-
-          // 转为相应的生命周期函数
-          classProperty = transformToReactCycle({path, keyName, nodeParams, nodeBody})
-          path.replaceWith(classProperty)
-        } 
-      }
-    })
   }
 
   watchClose() {

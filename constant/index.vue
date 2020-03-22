@@ -12,11 +12,11 @@ import { Dialog, Toast, Table, Tree } from 'i-mayfly';
 import 'i-mayfly/lib/component/table/style/css';
 // import 'i-mayfly/lib/component/dialog/style/css';
 export default {
-  name: 'HelloWorld',
+  // name: 'HelloWorld',
   data () {
     return {
       obj: {
-        a: 1
+         a: 1
       },
       msg: 'Welcome to Your Vue.js App'
     }
@@ -25,12 +25,17 @@ export default {
     if (this.obj) {
       console.log(Table, '3414321')
     }
-
+  },
+  beforeMount() {
+    console.log('4134341413')
   },
   methods: {
     initialMethod() {
-      console.log('this is vue method')
-    }
+      console.log('vue method')
+    },
+    secondMethod() {
+      console.log('vue method second')
+    },
   }
 }
 </script>
