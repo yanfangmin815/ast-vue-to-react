@@ -53,10 +53,12 @@ const transformToConstructor = ({ path }) => {
     let astContent
     traverse(ast, {
         Program: {
-          enter(path) {},
+          enter(path) {
+
+          },
           exit() {
             astContent = ast
-            // cb(ast, filePath)
+            cb(ast, filePath)
           }
       },
       ImportDeclaration(path) {
@@ -93,10 +95,10 @@ const transformToConstructor = ({ path }) => {
         !bool && path.replaceWithMultiple(arrs)
       },
       MemberExpression(path) {
-        if (t.isThisExpression(path.node.object) && Reflect.ownKeys(path.node.object).length > 1) {
-console.log(5354354)
-          const memberExpression = t.memberExpression(path.node.object, t.identifier('state'))
-        //   path.replaceWith(memberExpression)
+        if ( t.isThisExpression(path.node.object) 
+             && t.isIdentifier(path.node.property) 
+             && path.node.property.name !== 'state') {
+          path.get('object').replaceWith(t.memberExpression(t.thisExpression(), t.identifier('state')))
         }
       }
     })
