@@ -58,7 +58,7 @@ const transformToConstructor = ({ path }) => {
           },
           exit() {
             astContent = ast
-            cb(ast, filePath)
+            // cb(ast, filePath)
           }
       },
       ImportDeclaration(path) {
@@ -94,6 +94,7 @@ const transformToConstructor = ({ path }) => {
         })
         !bool && path.replaceWithMultiple(arrs)
       },
+      // 处理this
       MemberExpression(path) {
         if ( t.isThisExpression(path.node.object) 
              && t.isIdentifier(path.node.property) 
