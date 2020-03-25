@@ -1,9 +1,9 @@
-const defaultKind = 'method'
-const defaultProps = 'props'
+const DEFAULTKIND = 'method'
+const DEFAULTPROPS = 'props'
 const DEFAULTCONSTRUCTOR = 'constructor'
 
 module.exports = {
-    defaultKind,
-    defaultProps,
+    DEFAULTKIND,
+    DEFAULTPROPS,
     DEFAULTCONSTRUCTOR
 }

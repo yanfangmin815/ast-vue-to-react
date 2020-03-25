@@ -7,8 +7,8 @@ const {
     getBasename,
     transformUppercaseFirstLetter } = require('./utils')
 const { 
-    defaultKind,
-    defaultProps,
+    DEFAULTKIND,
+    DEFAULTPROPS,
     DEFAULTCONSTRUCTOR } = require('./constant')
 
 const plugins = {
@@ -35,16 +35,16 @@ const transformToConstructor = ({ path }) => {
     const argument = path.node.body.body[0].argument
     return t.classMethod(DEFAULTCONSTRUCTOR, 
             t.identifier(DEFAULTCONSTRUCTOR), 
-            [t.identifier(defaultProps)], 
+            [t.identifier(DEFAULTPROPS)], 
             t.blockStatement([
-              t.expressionStatement(t.callExpression(t.super(), [t.identifier(defaultProps)])),
+              t.expressionStatement(t.callExpression(t.super(), [t.identifier(DEFAULTPROPS)])),
               t.expressionStatement(t.assignmentExpression('=', 
                       t.memberExpression(t.thisExpression(),t.identifier('state')), argument))
             ]))
   }
   
   const transformToLifeCycle = ({ keyName, nodeParams, nodeBody }) => {
-    return t.classMethod(defaultKind, t.identifier(plugins[keyName]), nodeParams, nodeBody)
+    return t.classMethod(DEFAULTKIND, t.identifier(plugins[keyName]), nodeParams, nodeBody)
   }
   
   const transformToReactCycle = (args) => {
@@ -74,7 +74,7 @@ const transformToConstructor = ({ path }) => {
               }
             })
             astContent = ast
-            cb(ast, filePath)
+            // cb(ast, filePath)
           }
       },
       ImportDeclaration(path) {
@@ -93,6 +93,7 @@ const transformToConstructor = ({ path }) => {
           path.replaceWith(classProperty)
         } 
       },
+      // 将methods中的方法转为箭头函数
       ObjectProperty(path) {
         const properties = path.node.value.properties
         let bool = false
