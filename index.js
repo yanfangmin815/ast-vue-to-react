@@ -10,6 +10,7 @@ const t = require('@babel/types');
 const _ = require('lodash');
 
 const { handleJsAst } = require('./utils/handleScript')
+const { handleTemplateAst } = require('./utils/handleTemplate')
 
 const generateCatchClause = () => {
   // param-2
@@ -92,6 +93,7 @@ class AutoTryCatch {
     this.compileHasError = false;
     this.pattern = ['.vue']
     this.jsAst = null
+    this.templateAst = null
   }
 
   getFile(paths) {
@@ -121,8 +123,8 @@ class AutoTryCatch {
                     // const path = item + '/' + data[i]
                     const extname = _this.getExtname(path2)
                     if (_this.pattern.includes(extname)) {
-                      const ast = _this.getAst(path2);
-                      _this.handleTraverse(ast, path2)
+                      let astObj = _this.getAst(path2);
+                      _this.handleTraverse(astObj, path2)
                     }
                   }
                 });
@@ -132,8 +134,8 @@ class AutoTryCatch {
           case false:
             const extname = _this.getExtname(path1)
             if (_this.pattern.includes(extname)) {
-              const ast = _this.getAst(path1);
-              _this.handleTraverse(ast, path1)
+              let astObj = _this.getAst(path1);
+              _this.handleTraverse(astObj, path1)
             }
             break;
           default:
@@ -177,16 +179,16 @@ class AutoTryCatch {
   handleChange() {
     return (pathname, stats) => {
       const filePath = this.getReolve(pathname)
-      const ast = this.getAst(filePath)
-      this.handleTraverse(ast, filePath)
+      const astObj = this.getAst(filePath)
+      this.handleTraverse(astObj, filePath)
     }
   }
 
-  handleTraverse(ast='', filePath='') {
+  handleTraverse({ast='', templateAst=''}, filePath='') {
       let isChanged = true
       // 如果不符合条件 则不添加try...catch
       if (isChanged) {
-        this.handleAst(ast, filePath)
+        this.handleAst(ast, templateAst, filePath)
       }
   }
 
@@ -194,7 +196,7 @@ class AutoTryCatch {
     const content = fs.readFileSync(filename, 'utf8')
     const res = compiler.parseComponent(content.toString(), { pad: 'line' });
     const component = {
-      template: res.template,
+      template: res.template.content,
       js: res.script.content.replace(/\/\/\n/g, ''),
       styles: res.styles
     }
@@ -202,8 +204,12 @@ class AutoTryCatch {
     try {
       const ast = parse(component.js, {
         sourceType: 'module'
-    }); // get ast tree
-      return ast;
+      });
+      const templateAst = compiler.compile(component.template).ast
+      // console.log(templateAst.children[0].children, '>>>>>>>>>>>>>')
+      // console.log(templateAst.children, '?????????>>>>>>>>????')
+
+      return {ast,templateAst};
     } catch (error) {
       console.log(error);
       return null;
@@ -224,10 +230,14 @@ class AutoTryCatch {
       // fs.writeFileSync(filePath, output.code);
   }
 
-  handleAst(ast, filePath) {
-    this.jsAst = handleJsAst(ast, filePath, this.autoWriteFileSync)
-    // 处理template
-    
+  handleAst(ast, templateAst, filePath) {
+    new Promise((reslove,reject) => {
+      this.jsAst = handleJsAst(ast, filePath, this.autoWriteFileSync)
+      reslove(this.jsAst)
+    }).then((data) => {
+      // 处理template
+      this.templateAst = handleTemplateAst(data, templateAst, filePath, this.autoWriteFileSync)
+    }, err => {})
   }
 
   watchClose() {

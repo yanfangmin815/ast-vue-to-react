@@ -1,8 +1,10 @@
 <template>
   <div class="hello">
-      <ul>
-        <li class="div1"></li>
+      <ul v-if='true'>
+        <li v-for="(item,key) in arrs" class="div1" key="key"></li>
     </ul>
+    <input v-model="val" class='inputStyle'>
+    <p class='pStyle'>this is vue template</p>
   </div>
 </template>
 
