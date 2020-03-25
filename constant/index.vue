@@ -22,7 +22,7 @@ export default {
     }
   },
   mounted() {
-    if (this.obj) {
+    if (this.obj && this.msg) {
       console.log(Table, '3414321')
     }
   },

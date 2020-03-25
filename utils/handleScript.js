@@ -1,10 +1,11 @@
 
-const path = require('path')
-const t = require('babel-types');
+const t = require('@babel/types');
 const traverse = require("@babel/traverse").default;
 const { 
     isObject,
-    isArray } = require('./utils')
+    isArray,
+    getBasename,
+    transformUppercaseFirstLetter } = require('./utils')
 const { 
     defaultKind,
     defaultProps,
@@ -27,7 +28,7 @@ const plugins = {
       const nodeParams = proper.params
       let classProperty = null
       classProperty = t.classProperty(t.identifier(keyName),
-                t.arrowFunctionExpression(nodeParams, nodeBody))     
+                            t.arrowFunctionExpression(nodeParams, nodeBody))     
       return classProperty
   }
 const transformToConstructor = ({ path }) => {
@@ -50,15 +51,30 @@ const transformToConstructor = ({ path }) => {
     return plugins[args.keyName] === 'state' ? transformToConstructor(args) : transformToLifeCycle(args)
   }
   const handleJsAst = (ast, filePath, cb) => {
+    let basename = transformUppercaseFirstLetter(getBasename(filePath))
     let astContent
     traverse(ast, {
         Program: {
           enter(path) {
-
+            ast.program.body.unshift(t.importDeclaration([
+              t.importDefaultSpecifier(t.identifier('React')),
+              t.importSpecifier(t.identifier('Component'), t.identifier('Component')),
+              t.importSpecifier(t.identifier('PropTypes'), t.identifier('PropTypes'))],
+              t.stringLiteral('react')))
           },
-          exit() {
+          exit(path) {
+            traverse(ast, {
+              // 处理export default -> class componentName extends React.Component 
+              ExportDefaultDeclaration(path) {
+                const properties = path.node.declaration.properties
+                const classDeclaration = t.classDeclaration(t.identifier(basename), 
+                                         t.memberExpression(t.identifier('React'), t.identifier('Component')),
+                                         t.classBody(properties))
+                path.replaceWith(classDeclaration)
+              }
+            })
             astContent = ast
-            // cb(ast, filePath)
+            cb(ast, filePath)
           }
       },
       ImportDeclaration(path) {
@@ -101,7 +117,8 @@ const transformToConstructor = ({ path }) => {
              && path.node.property.name !== 'state') {
           path.get('object').replaceWith(t.memberExpression(t.thisExpression(), t.identifier('state')))
         }
-      }
+      },
+      
     })
     return astContent
   }

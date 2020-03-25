@@ -1,7 +1,16 @@
 const fs = require('fs')
+const nodePath = require('path')
 
 const isExist = (path) => {
   return fs.existsSync(path)
+}
+
+const transformUppercaseFirstLetter = (name) => {
+  return name.charAt(0).toUpperCase() + name.slice(1)
+}
+
+const getBasename = (pathName) => {
+  return nodePath.basename(pathName, '.vue')
 }
 
 const isObject = (obj) => {
@@ -17,5 +26,7 @@ const isArray = (obj) => {
 module.exports = {
   isExist,
   isObject,
-  isArray
+  isArray,
+  getBasename,
+  transformUppercaseFirstLetter
 }

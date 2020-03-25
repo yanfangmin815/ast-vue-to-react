@@ -6,7 +6,7 @@ const compiler = require('vue-template-compiler');
 const path = require('path');
 const traverse = require("@babel/traverse").default;
 const generator = require('@babel/generator').default; // https://www.babeljs.cn/docs/6.26.3/babel-types
-const t = require('babel-types');
+const t = require('@babel/types');
 const _ = require('lodash');
 
 const { handleJsAst } = require('./utils/handleScript')
@@ -227,7 +227,7 @@ class AutoTryCatch {
   handleAst(ast, filePath) {
     this.jsAst = handleJsAst(ast, filePath, this.autoWriteFileSync)
     // 处理template
-
+    
   }
 
   watchClose() {
