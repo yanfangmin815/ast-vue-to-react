@@ -9,31 +9,37 @@ const {
 const maps = {
     class: 'className'
 }
-  // 将class处理为className
-  const handleClass = (templateAst) => {
-    templateAst.children.forEach((item, index) => {
-        if (item.attrsMap && Object.keys(item.attrsMap).length) {
-            for (key in item.attrsMap) {
-                if (key === 'class') {
-                    item.attrsMap[maps[key]] = item.attrsMap[key]
-                    delete item.attrsMap[key]
-                }
-            }
-        }
-        if (item.children && item.children.length >= 1) handleClass(item)
-    })
-  }
 
-  const handleTemplateAst = (ast, templateAst, filePath, cb) => {
-    let basename = transformUppercaseFirstLetter(getBasename(filePath))
-    let astContent
-    handleClass(templateAst)
-    console.log(templateAst.children, '>>>>>>>>>>>>>>>>')
-
-    // cb(templateAst)
-    return astContent
+const handleSubClass = (templateAst) => {
+  if (templateAst.attrsMap && Object.keys(templateAst.attrsMap).length) {
+      for (key in templateAst.attrsMap) {
+          if (key === 'class') {
+              templateAst.attrsMap[maps[key]] = templateAst.attrsMap[key]
+              delete templateAst.attrsMap[key]
+          }
+      }
   }
+}
 
-  module.exports = {
-    handleTemplateAst
-  }
+// 将class处理为className
+const handleClass = (templateAst) => {
+  handleSubClass(templateAst)
+  templateAst.children.forEach((item, index) => {
+      handleSubClass(item)
+      if (item.children && item.children.length >= 1) handleClass(item)
+  })
+}
+
+const handleTemplateAst = (ast, templateAst, filePath, cb) => {
+  let basename = transformUppercaseFirstLetter(getBasename(filePath))
+  let astContent
+  handleClass(templateAst)
+  // console.log(templateAst.children, 'templateAst')
+
+  // cb(templateAst)
+  return astContent
+}
+
+module.exports = {
+  handleTemplateAst
+}
