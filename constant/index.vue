@@ -1,13 +1,13 @@
 <template>
   <div class="hello">
-      <ul v-show='a== 3'>
-        <li v-for="(item,key) in arrs" class="div1" key="key"></li>
+      <ul v-show='a== 3' class='ttt'>
+        <li class="div1"></li>
     </ul>
-    <input v-model="val" class='inputStyle'/>
+    <input class='inputStyle' />
     <p></p>
   </div>
 </template>
-//  class='pStyle'
+
 <script>
 import { Dialog, Toast, Table, Tree } from 'i-mayfly';
 import 'i-mayfly/lib/component/table/style/css';
