@@ -1,16 +1,15 @@
 <template>
   <div class="hello">
-      <ul v-if='true'>
+      <ul v-show='a== 3'>
         <li v-for="(item,key) in arrs" class="div1" key="key"></li>
     </ul>
-    <input v-model="val" class='inputStyle'>
-    <p class='pStyle'>this is vue template</p>
+    <input v-model="val" class='inputStyle'/>
+    <p></p>
   </div>
 </template>
-
+//  class='pStyle'
 <script>
 import { Dialog, Toast, Table, Tree } from 'i-mayfly';
-
 import 'i-mayfly/lib/component/table/style/css';
 // import 'i-mayfly/lib/component/dialog/style/css';
 export default {
