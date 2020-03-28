@@ -1,6 +1,6 @@
 const fs = require('fs')
 const nodePath = require('path')
-const regIsEqual = '/(\w+(\-*|\w*)\w*)(==|===)(\W*\w+\W*)/g' // 匹配 str ==|=== val or str ==|=== 'val'
+const regIsEqual = /(\w+(\-*|\w*)\w*)(==|===)(\W*\w+\W*)/g // 匹配 str ==|=== val or str ==|=== 'val'
 
 const isExist = (path) => {
   return fs.existsSync(path)
@@ -25,8 +25,12 @@ const isArray = (obj) => {
 }
 
 const isEqualExpression = (val) => {
-  const str = val.replace(/\s*/g,"")
+  const str = trim(val)
   return regIsEqual.test(str)
+}
+
+const trim = (str) => {
+  return str.replace(/\s*/g,"")
 }
 
 
@@ -37,5 +41,6 @@ module.exports = {
   isArray,
   getBasename,
   transformUppercaseFirstLetter,
-  isEqualExpression
+  isEqualExpression,
+  trim
 }

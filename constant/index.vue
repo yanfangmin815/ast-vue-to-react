@@ -3,7 +3,7 @@
       <ul v-show='a== 3' class='ttt'>
         <li class="div1"></li>
     </ul>
-    <input class='inputStyle' />
+    <input class='inputStyle' v-if='a===3'/>
     <p></p>
   </div>
 </template>
