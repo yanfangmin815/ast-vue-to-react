@@ -7,7 +7,8 @@ const {
   isEquals } = require('./utils')
 const { 
   DEFAULTKIND,
-  DEFAULTPROPS } = require('./constant')
+  ONCHANGE,
+  SETSTATE } = require('./constant')
 const maps = {
     class: 'className'
 }
@@ -45,6 +46,11 @@ const handleVIf = (item, vals) => {
   return t.jsxAttribute(t.jsxIdentifier(item),t.stringLiteral(vals))
 }
 
+// 处理v-model
+const handleVModel = (item, vals) => {
+  return t.jsxAttribute(t.jsxIdentifier(item),t.stringLiteral(vals))
+}
+
 const handleClassContainer = (templateAst) => {
   handleClass(templateAst) // class处理为className
   const { attrsMap } = templateAst
@@ -58,6 +64,8 @@ const handleClassContainer = (templateAst) => {
         return handleVShow(vals)
       case 'v-if':
         return handleVIf(item,vals) // 放到render里面处理
+      case 'v-model':
+        return handleVModel(item,vals) // 放到render里面处理
     }
   })
   return !attrsSet ? [] : attrsSet
@@ -80,7 +88,7 @@ const handleToJSXElement = (templateAst) => {
                 t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
         }
         if (item.type == '3') {
-          jsxElement = t.jsxText('\n')
+          jsxElement = t.jsxText(item.text ? item.text: '\n')
         }
 
         return jsxElement
@@ -122,9 +130,19 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
           break;
         }
       }
+    },
+    JSXAttribute(path) {
+      const { name: { name }, value: { value } } = path.node
+      if (isEquals(name, 'v-model')) {
+        const jsxAttribute = t.jsxAttribute(t.jsxIdentifier(ONCHANGE),
+                  t.jsxExpressionContainer(t.arrowFunctionExpression([t.identifier('val')],
+                      t.callExpression(t.memberExpression(t.thisExpression(),t.Identifier(SETSTATE)),
+                          [t.objectExpression([t.objectProperty(t.identifier(value),t.identifier('val'))])]))))
+        path.replaceWith(jsxAttribute)
+      }
     }
   })  
-  cb(ast)
+  // cb(ast)
   return astContent
 }
 

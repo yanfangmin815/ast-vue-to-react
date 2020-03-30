@@ -1,13 +1,11 @@
 <template>
   <div class="hello">
-      <ul v-show='a' class='ttt'>
+      <ul class='ttt' v-show='a'>
         <li class="div1"></li>
         <li class="div1"></li>
     </ul>
-    <input-li class='inputStyle' v-if='a'>
-      <div></div>
-    </input-li>
-    <p></p>
+    <input class='inputStyle' v-model='value'/>
+    <p>123</p>
   </div>
 </template>
 

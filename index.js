@@ -203,13 +203,8 @@ class AutoTryCatch {
     try {
       const ast = babylon.parse(component.js, {
         sourceType: 'module'
-      });
-      // const templateAst = babylon.parse(component.template, {
-      //   sourceType: 'module'
-      // });
+      })
       const templateAst = compiler.compile(component.template).ast
-      // console.log(templateAst.children[0].children, '>>>>>>>>>>>>>')
-      // console.log(templateAst, '?????????>>>>>>>>????')
 
       return {ast,templateAst};
     } catch (error) {
