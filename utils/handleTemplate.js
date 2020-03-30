@@ -111,8 +111,8 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
           path.traverse({
             // 移除v-if指令
             JSXAttribute(path) {
-              const nameChild = path.node.name.name
-              isEquals(nameChild, 'v-if') && path.remove()
+              const { name: { name } } = path.node
+              isEquals(name, 'v-if') && path.remove()
             }
           })
           const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
@@ -123,7 +123,7 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
       }
     }
   })  
-  // cb(ast)
+  cb(ast)
   return astContent
 }
 
