@@ -118,10 +118,10 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
         const { name: { name }, value: { value } } = attributes[index]
         if (isEquals(name, 'v-if')) {
           path.traverse({
-            // 移除v-if指令
+            // 移除v-if指令 && 但不移除子标签的v-i指令
             JSXAttribute(path) {
-              const { name: { name } } = path.node
-              isEquals(name, 'v-if') && path.remove()
+              const { name: { name }, value: { value: subValue }  } = path.node
+              isEquals(value, subValue) && isEquals(name, 'v-if') && path.remove()
             }
           })
           const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)

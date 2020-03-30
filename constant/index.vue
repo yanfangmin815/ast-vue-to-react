@@ -1,8 +1,8 @@
 <template>
   <div class="hello">
-      <ul class='ttt' v-show='a'>
-        <li class="div1"></li>
-        <li class="div1"></li>
+      <ul class='ttt' v-if='a'>
+        <li class="div1" v-if='b'></li>
+        <li class="div1" v-if='c'></li>
     </ul>
     <input class='inputStyle' v-model='value'/>
     <p>123</p>
