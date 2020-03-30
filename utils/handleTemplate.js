@@ -123,7 +123,7 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
       }
     }
   })  
-  cb(ast)
+  // cb(ast)
   return astContent
 }
 
