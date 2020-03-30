@@ -106,8 +106,7 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
     JSXElement(path) {
       const attributes = path.node.openingElement.attributes
       for (let index=0; index<attributes.length; index++) {
-        const { name } = attributes[index].name
-        const { value } = attributes[index].value
+        const { name: { name }, value: { value } } = attributes[index]
         if (isEquals(name, 'v-if')) {
           path.traverse({
             // 移除v-if指令
