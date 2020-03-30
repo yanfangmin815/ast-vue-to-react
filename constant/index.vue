@@ -1,7 +1,7 @@
 <template>
   <div class="hello">
       <ul class='ttt' v-if='a'>
-        <li class="div1" v-if='b'></li>
+        <li class="div1" v-for='item in arrs'></li>
         <li class="div1" v-if='c'></li>
     </ul>
     <input class='inputStyle' v-model='value'/>

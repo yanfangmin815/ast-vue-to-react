@@ -38,6 +38,10 @@ const isEquals = (val1,val2) => {
   return Object.is(val1, val2)
 }
 
+const handleFor = (forValue) => {
+  return forValue.split(/\bin\b/)
+}
+
 
 module.exports = {
   isExist,
@@ -48,5 +52,6 @@ module.exports = {
   isEqualExpression,
   trim,
   isEquals,
-  cloneDeep
+  cloneDeep,
+  handleFor
 }

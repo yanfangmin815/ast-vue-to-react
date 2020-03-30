@@ -4,11 +4,13 @@ const traverse = require("@babel/traverse").default;
 const { 
   isEqualExpression,
   trim,
-  isEquals } = require('./utils')
+  isEquals,
+  handleFor } = require('./utils')
 const { 
   DEFAULTKIND,
   ONCHANGE,
-  SETSTATE } = require('./constant')
+  SETSTATE,
+  DEFAULTPROPS } = require('./constant')
 const maps = {
     class: 'className'
 }
@@ -51,6 +53,11 @@ const handleVModel = (item, vals) => {
   return t.jsxAttribute(t.jsxIdentifier(item),t.stringLiteral(vals))
 }
 
+// 处理v-for
+const handleVFor = (item, vals) => {
+  return t.jsxAttribute(t.jsxIdentifier(item),t.stringLiteral(vals))
+}
+
 const handleClassContainer = (templateAst) => {
   handleClass(templateAst) // class处理为className
   const { attrsMap } = templateAst
@@ -66,6 +73,8 @@ const handleClassContainer = (templateAst) => {
         return handleVIf(item,vals) // 放到render里面处理
       case 'v-model':
         return handleVModel(item,vals) // 放到render里面处理
+      case 'v-for':
+        return handleVFor(item,vals) // 放到render里面处理
     }
   })
   return !attrsSet ? [] : attrsSet
@@ -129,6 +138,35 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
           path.replaceWith(jsxExpressionContainer)
           break;
         }
+        if (isEquals(name, 'v-for')) {
+          path.traverse({
+            // 移除v-for指令 && 但不移除子标签的v-for指令
+            JSXAttribute(path) {
+              const { name: { name }, value: { value: subValue }  } = path.node
+              isEquals(value, subValue) && isEquals(name, 'v-for') && path.remove()
+            }
+          })
+          const [val1, val2] = handleFor(value)
+          let item,index,expression
+          if (val1.includes('(')) {
+            const arr = val1.split(',')
+            const len = arr.length
+            switch (len) {
+              case 1:
+                item = trim(arr[0].slice(1,-2))
+                expression = [t.identifier(item)]
+              case 2:
+                const sliceArr = [trim(arr[0].slice(1)), trim(arr[1].slice(0,-2))]
+                expression = sliceArr.map(subItem => {
+                  return t.identifier(subItem)
+                })
+            } 
+          }
+          expression = [t.identifier(trim(val1))]
+          const jsxExpressionContainer = t.jsxExpressionContainer(t.callExpression(t.memberExpression(t.memberExpression(t.memberExpression(t.thisExpression(),t.identifier(DEFAULTPROPS)),
+                    t.identifier(trim(val2))),t.identifier('map')),[t.arrowFunctionExpression(expression,node)]))
+          path.replaceWith(jsxExpressionContainer)
+        }
       }
     },
     JSXAttribute(path) {
@@ -142,7 +180,7 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
       }
     }
   })  
-  // cb(ast)
+  cb(ast)
   return astContent
 }
 
