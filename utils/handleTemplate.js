@@ -104,7 +104,8 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
   pushToAst(ast)
   traverse(ast, {
     JSXElement(path) {
-      const attributes = path.node.openingElement.attributes
+      const { node } = path
+      const attributes = node.openingElement.attributes
       for (let index=0; index<attributes.length; index++) {
         const { name: { name }, value: { value } } = attributes[index]
         if (isEquals(name, 'v-if')) {
@@ -116,7 +117,7 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
             }
           })
           const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
-          const jsxExpressionContainer = t.jsxExpressionContainer(t.conditionalExpression(types,path.node,t.nullLiteral()))
+          const jsxExpressionContainer = t.jsxExpressionContainer(t.conditionalExpression(types,node,t.nullLiteral()))
           path.replaceWith(jsxExpressionContainer)
           break;
         }
