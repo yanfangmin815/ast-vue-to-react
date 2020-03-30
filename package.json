@@ -26,16 +26,17 @@
     "@babel/generator": "^7.4.4",
     "@babel/parser": "^7.4.5",
     "@babel/traverse": "^7.4.5",
+    "@babel/types": "^7.9.0",
     "babylon": "^6.18.0",
     "chokidar": "^3.0.1",
     "i-mayfly": "0.0.7",
-    "lodash": "^4.17.15",
     "react": "^16.13.0",
     "vue-template-compiler": "^2.6.11",
     "webpack-node-externals": "^1.7.2"
   },
   "devDependencies": {
     "babel-loader": "^8.0.6",
+    "lodash": "^4.17.15",
     "webpack": "^4.32.2",
     "webpack-cli": "^3.3.2"
   },

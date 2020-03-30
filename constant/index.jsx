@@ -26,10 +26,13 @@ class Index extends React.Component {
     render() {
         return(
             <div class="hello">
-                <ul>
-                    <li class="div1"></li>
-                </ul>
-            </div>
+            <ul v-show='a' class='ttt'>
+              <li class="div1"></li>
+              <li class="div1"></li>
+          </ul>
+          <input class='inputStyle' v-if='a===3'/>
+          <p></p>
+        </div>
         )
     }
 }

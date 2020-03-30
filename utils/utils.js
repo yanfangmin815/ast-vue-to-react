@@ -1,5 +1,6 @@
 const fs = require('fs')
 const nodePath = require('path')
+const cloneDeep = require('lodash').cloneDeep
 const regIsEqual = /(\w+(\-*|\w*)\w*)(==|===)(\W*\w+\W*)/g // 匹配 str ==|=== val or str ==|=== 'val'
 
 const isExist = (path) => {
@@ -33,6 +34,9 @@ const trim = (str) => {
   return str.replace(/\s*/g,"")
 }
 
+const isEquals = (val1,val2) => {
+  return Object.is(val1, val2)
+}
 
 
 module.exports = {
@@ -42,5 +46,7 @@ module.exports = {
   getBasename,
   transformUppercaseFirstLetter,
   isEqualExpression,
-  trim
+  trim,
+  isEquals,
+  cloneDeep
 }

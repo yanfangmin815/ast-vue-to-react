@@ -3,7 +3,8 @@ const t = require('@babel/types');
 const traverse = require("@babel/traverse").default;
 const { 
   isEqualExpression,
-  trim } = require('./utils')
+  trim,
+  isEquals } = require('./utils')
 const { 
   DEFAULTKIND,
   DEFAULTPROPS } = require('./constant')
@@ -102,16 +103,28 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
   handleToJSXElement(templateAst)
   pushToAst(ast)
   traverse(ast, {
-    JSXIdentifier(path) {
-      if (path.node.name === 'v-if') {
-        console.log(path.node.name, '???????')
-
+    JSXElement(path) {
+      const attributes = path.node.openingElement.attributes
+      for (let index=0; index<attributes.length; index++) {
+        const { name } = attributes[index].name
+        const { value } = attributes[index].value
+        if (isEquals(name, 'v-if')) {
+          path.traverse({
+            // 移除v-if指令
+            JSXAttribute(path) {
+              const nameChild = path.node.name.name
+              isEquals(nameChild, 'v-if') && path.remove()
+            }
+          })
+          const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
+          const jsxExpressionContainer = t.jsxExpressionContainer(t.conditionalExpression(types,path.node,t.nullLiteral()))
+          path.replaceWith(jsxExpressionContainer)
+          break;
+        }
       }
     }
   })  
-  // console.log(jsxElement.children[2].openingElement.attributes, 'templateAst')
-
-  // cb(templateAst)
+  cb(ast)
   return astContent
 }
 

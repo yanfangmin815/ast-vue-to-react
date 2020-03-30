@@ -1,9 +1,12 @@
 <template>
   <div class="hello">
-      <ul v-show='a== 3' class='ttt'>
+      <ul v-show='a' class='ttt'>
+        <li class="div1"></li>
         <li class="div1"></li>
     </ul>
-    <input class='inputStyle' v-if='a===3'/>
+    <input-li class='inputStyle' v-if='a'>
+      <div></div>
+    </input-li>
     <p></p>
   </div>
 </template>

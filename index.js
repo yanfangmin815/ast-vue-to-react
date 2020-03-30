@@ -201,7 +201,7 @@ class AutoTryCatch {
       styles: res.styles
     }
     try {
-      const ast = parse(component.js, {
+      const ast = babylon.parse(component.js, {
         sourceType: 'module'
       });
       // const templateAst = babylon.parse(component.template, {
