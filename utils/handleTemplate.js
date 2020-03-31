@@ -115,6 +115,16 @@ const pushToAst = (ast) => {
       t.blockStatement([t.returnStatement(jsxElement)])))
 }
 
+const removeInstruction = (path, value, key) => {
+  path.traverse({
+    // 移除v-if指令 && 但不移除子标签的v-if指令
+    JSXAttribute(path) {
+      const { name: { name }, value: { value: subValue }  } = path.node
+      isEquals(value, subValue) && isEquals(name, key) && path.remove()
+    }
+  })
+}
+
 const handleTemplateAst = (ast, templateAst, filePath, cb) => {
   let astContent
   handleToJSXElement(templateAst)
@@ -126,28 +136,15 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
       for (let index=0; index<attributes.length; index++) {
         const { name: { name }, value: { value } } = attributes[index]
         if (isEquals(name, 'v-if')) {
-          path.traverse({
-            // 移除v-if指令 && 但不移除子标签的v-if指令
-            JSXAttribute(path) {
-              const { name: { name }, value: { value: subValue }  } = path.node
-              isEquals(value, subValue) && isEquals(name, 'v-if') && path.remove()
-            }
-          })
+          removeInstruction(path, value, 'v-if')
           const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
           const jsxExpressionContainer = t.jsxExpressionContainer(t.conditionalExpression(types,node,t.nullLiteral()))
           path.replaceWith(jsxExpressionContainer)
-          break;
         }
         if (isEquals(name, 'v-for')) {
-          path.traverse({
-            // 移除v-for指令 && 但不移除子标签的v-for指令
-            JSXAttribute(path) {
-              const { name: { name }, value: { value: subValue }  } = path.node
-              isEquals(value, subValue) && isEquals(name, 'v-for') && path.remove()
-            }
-          })
+          removeInstruction(path, value, 'v-for')
           const [val1, val2] = handleFor(value)
-          let item,index,expression
+          let item, expression
           if (val1.includes('(')) {
             const arr = val1.split(',')
             const len = arr.length
