@@ -125,18 +125,23 @@ const handleToJSXElementSingle = (templateAst) => {
 }
 
 const handleToJSXElement = (templateAst) => {
-    // 若为顶级标签元素 弄三套顶级container出来
+    // 若为顶级标签元素 弄n套顶级container出来
     const temIfConditions = templateAst.ifConditions
     if (!templateAst.parent && temIfConditions.length) {
       jsxElementContainer = temIfConditions.map((item,index) => {
         return handleToJSXElementSingle(item.block).jsxElement
       })
-    }
+    } else handleToJSXElementSingle(item.block)
+
 }
 
 const pushToAst = (ast) => {
-  ast.program.body.push(t.classMethod(DEFAULTKIND,t.identifier('render'),[],
-      t.blockStatement([t.returnStatement(jsxElement)])))
+  if (jsxElementContainer && jsxElementContainer.length) {
+
+  } else {
+    ast.program.body.push(t.classMethod(DEFAULTKIND,t.identifier('render'),[],
+        t.blockStatement([t.returnStatement(jsxElement)])))
+  }
 }
 
 const removeInstruction = (path, value, key) => {

@@ -24,15 +24,22 @@ class Index extends React.Component {
       }
 
     render() {
-        return(
-            <div class="hello">
-            <ul v-show='a' class='ttt'>
-              <li class="div1"></li>
-              <li class="div1"></li>
-          </ul>
-          <input class='inputStyle' v-if='a===3'/>
-          <p></p>
-        </div>
+      if (a!==3) {
+          return
+      		<div>123</div>
+          } else if (a===3) {
+         return(
+          <div class="hello">
+              <ul v-show='a' class='ttt'>
+                <li class="div1"></li>
+            </ul>
+            <input class='inputStyle'/>
+           <p v-if='b===2'>123</p>
+           <p v-else>321</p>
+           {b===2?<p>123</p>:<p>321</p>}</div>
         )
+      }
+      
+       
     }
 }
