@@ -42,6 +42,22 @@ const handleFor = (forValue) => {
   return forValue.split(/\bin\b/)
 }
 
+const judgeIfFor = (isAll) => {
+  return (isAll.includes('v-if') && isAll.includes('v-for')) 
+        || (isAll.includes('v-else') && isAll.includes('v-for')) 
+        || (isAll.includes('v-else-if') && isAll.includes('v-for'))
+}
+
+// var arr = new Array(6)
+// arr[0] = "George"
+// arr[1] = "John"
+// arr[2] = "Thomas"
+// arr[3] = "James"
+// arr[4] = "Adrew"
+// arr[5] = "Martin"
+// var result = [{},{},{}].join('')
+// arr.splice(2,1,{a:1},result)
+// console.log(arr.slice(0,-1), '<<<<<<<>????????????')
 
 module.exports = {
   isExist,
@@ -53,5 +69,6 @@ module.exports = {
   trim,
   isEquals,
   cloneDeep,
-  handleFor
+  handleFor,
+  judgeIfFor
 }

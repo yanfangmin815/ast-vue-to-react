@@ -205,6 +205,8 @@ class AutoTryCatch {
         sourceType: 'module'
       })
       const templateAst = compiler.compile(component.template).ast
+      // console.log(templateAst.children[0])
+      // console.log(res)
 
       return {ast,templateAst};
     } catch (error) {
