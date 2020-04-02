@@ -131,7 +131,7 @@ const handleToJSXElement = (templateAst) => {
       jsxElementContainer = temIfConditions.map((item,index) => {
         return handleToJSXElementSingle(item.block).jsxElement
       })
-    } else handleToJSXElementSingle(item.block)
+    } else handleToJSXElementSingle(templateAst)
 
 }
 
