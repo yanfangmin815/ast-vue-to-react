@@ -1,14 +1,18 @@
 <template>
  <!-- class="hello" -->
-  <div v-if='a'>
-     <ul class='ttt' v-if='a'>
+  <div>
+    <!-- <ul class='ttt' v-if='a'>
         <li class="div1" v-for='item in arrs'></li>
         <li class="div1" v-if='c'></li>
-    </ul>
-    <input class='inputStyle' v-model='value'/>
-    <p v-if='b===1'>456</p>
+    </ul>  -->
+     <!--<input class='inputStyle' v-model='value'/>-->
+    <p v-if='b===1'><span>123</span></p>
     <div v-else-if='b===3' class='bbbb'><p>123</p></div>
-    <div v-else>123</div>
+    
+    <p v-if='b===1'><span>123</span></p>
+    <div v-else class='bbbb'><p>123</p></div>
+    <!-- <div v-else>123</div> 
+     <div class='vvv'>123</div>  -->
   </div>
   <!-- <div class='cvb' v-else>12345</div> -->
 </template>

@@ -3,6 +3,8 @@ const nodePath = require('path')
 const cloneDeep = require('lodash').cloneDeep
 const regIsEqual = /(\w+(\-*|\w*)\w*)(==|===)(\W*\w+\W*)/g // 匹配 str ==|=== val or str ==|=== 'val'
 
+const tags = ['input','img','']
+
 const isExist = (path) => {
   return fs.existsSync(path)
 }
@@ -48,16 +50,13 @@ const judgeIfFor = (isAll) => {
         || (isAll.includes('v-else-if') && isAll.includes('v-for'))
 }
 
-// var arr = new Array(6)
-// arr[0] = "George"
-// arr[1] = "John"
-// arr[2] = "Thomas"
-// arr[3] = "James"
-// arr[4] = "Adrew"
-// arr[5] = "Martin"
-// var result = [{},{},{}].join('')
-// arr.splice(2,1,{a:1},result)
-// console.log(arr.slice(0,-1), '<<<<<<<>????????????')
+// const arr = [1,2,3,4,5,6,7,8]
+// for(let i=0;i<arr.length;i++) {
+//   console.log(i,'--------',353253245)
+//   if (i == 1) {
+//     i = 5
+//   }
+// }
 
 module.exports = {
   isExist,
@@ -70,5 +69,6 @@ module.exports = {
   isEquals,
   cloneDeep,
   handleFor,
-  judgeIfFor
+  judgeIfFor,
+  tags
 }

@@ -98,7 +98,9 @@ const handleToJSXElementSingle = (templateAst) => {
     let jsxOpeningElement = t.jsxOpeningElement(t.jsxIdentifier(templateAst.tag),attrsSet)
     let jsxClosingElement = t.jsxClosingElement(t.jsxIdentifier(templateAst.tag))
     handleConditions(templateAst)
-    let chilrenNodes = templateAst.children.length && templateAst.children.map((item, index) => {
+    let chilrenNodes = []
+    if(templateAst.children && templateAst.children.length){
+      for(let i=0;i<templateAst.children.length;i++) {
         let jsxElement
         let chilren = []
         if (item.children && item.children.length) {
@@ -106,28 +108,100 @@ const handleToJSXElementSingle = (templateAst) => {
           chilren = handleToJSXElementSingle(item).chilrenNodes
         }
         if (item.type == '1') {
+            if (item.ifConditions) {
+              const len = item.ifConditions.length
+              const attrsMap = item.attrsMap
+              // const { name: { name }, value } = attributes[index]
+              switch(len) {
+                case 1:
+                  const value = attrsMap['v-if']
+                  const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
+                  delete attrsMap['v-if']
+                  const attrsChildSet = handleClassContainer(item)
+                  const nodeJsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
+                                  t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
+                  jsxElement = t.jsxExpressionContainer(t.conditionalExpression(types,nodeJsxElement,t.nullLiteral()))
+                case 2:
+                  const keyArr = Object.keys(attrsMap)
+                  if () {
+                    
+                  }
+              }
+            } else {
               const attrsChildSet = handleClassContainer(item)
               jsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
-                    t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
-          }
-          if (item.type == '3') {
-            const text = item.text ? item.text : "\n"
-            jsxElement = t.jsxText(text)
-          }
-        return jsxElement
-    })
-
+                              t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
+            }
+        }
+        if (item.type == '3') {
+          const text = item.text ? item.text : "\n"
+          jsxElement = t.jsxText(text)
+        }
+        chilrenNodes.push(jsxElement)
+      }
+    }
     if (!chilrenNodes) {
       chilrenNodes = []
     }
     jsxElement = t.jsxElement(jsxOpeningElement, jsxClosingElement, chilrenNodes)
     return {chilrenNodes, jsxElement}
-}
+  }
+
+// const handleToJSXElementSingle = (templateAst) => {
+//     const attrsSet = handleClassContainer(templateAst)
+//     let jsxOpeningElement = t.jsxOpeningElement(t.jsxIdentifier(templateAst.tag),attrsSet)
+//     let jsxClosingElement = t.jsxClosingElement(t.jsxIdentifier(templateAst.tag))
+//     handleConditions(templateAst)
+//     let chilrenNodes = templateAst.children.length && templateAst.children.map((item, index) => {
+//         let jsxElement
+//         let chilren = []
+//         if (item.children && item.children.length) {
+//           // 遍历item.children 确认每个children是否都存在ifConditions
+//           chilren = handleToJSXElementSingle(item).chilrenNodes
+//         }
+//         if (item.type == '1') {
+//             if (item.ifConditions) {
+//               const len = item.ifConditions.length
+//               const attrsMap = item.attrsMap
+//               // const { name: { name }, value } = attributes[index]
+//               switch(len) {
+//                 case 1:
+//                   const value = attrsMap['v-if']
+//                   const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
+//                   delete attrsMap['v-if']
+//                   const attrsChildSet = handleClassContainer(item)
+//                   const nodeJsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
+//                                   t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
+//                   jsxElement = t.jsxExpressionContainer(t.conditionalExpression(types,nodeJsxElement,t.nullLiteral()))
+//                 case 2:
+//                   const keyArr = Object.keys(attrsMap)
+//               }
+//             } else {
+//               const attrsChildSet = handleClassContainer(item)
+//               jsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
+//                               t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
+//             }
+//             // const attrsChildSet = handleClassContainer(item)
+//             // jsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
+//             //                 t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
+//         }
+//         if (item.type == '3') {
+//           const text = item.text ? item.text : "\n"
+//           jsxElement = t.jsxText(text)
+//         }
+//         return jsxElement
+//     })
+//     if (!chilrenNodes) {
+//       chilrenNodes = []
+//     }
+//     jsxElement = t.jsxElement(jsxOpeningElement, jsxClosingElement, chilrenNodes)
+//     return {chilrenNodes, jsxElement}
+// }
 
 const handleToJSXElement = (templateAst) => {
     // 若为顶级标签元素 弄n套顶级container出来
     const temIfConditions = templateAst.ifConditions
-    if (!templateAst.parent && temIfConditions.length) {
+    if (!templateAst.parent && temIfConditions && temIfConditions.length) {
       jsxElementContainer = temIfConditions.map((item,index) => {
         return handleToJSXElementSingle(item.block).jsxElement
       })
@@ -158,7 +232,7 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
   let astContent
   handleToJSXElement(templateAst)
   pushToAst(ast)
-  // console.log(ast.program.body)
+  // console.log(templateAst)
   traverse(ast, {
     JSXElement(path) {
       const { node } = path
@@ -166,7 +240,6 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
       const isAll = attributes.map((item, index) => {
         return item.name.name
       })
-
       for (let index=0; index<attributes.length; index++) {
         const { name: { name }, value: { value } } = attributes[index]
         break;
@@ -212,7 +285,7 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
       }
     }
   })  
-  // cb(ast)
+  cb(ast)
   return astContent
 }
 
