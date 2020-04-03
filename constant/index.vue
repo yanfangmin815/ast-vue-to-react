@@ -8,8 +8,11 @@
      <!--<input class='inputStyle' v-model='value'/>-->
     <p v-if='b===1'><span>123</span></p>
     <div v-else-if='b===3' class='bbbb'><p>123</p></div>
-    
-    <p v-if='b===1'><span>123</span></p>
+
+    <p v-if='b===2'><span>123</span></p>
+    <div v-else class='bbbb'><p>123</p></div>
+
+    <p v-if='b===3'><span>123</span></p>
     <div v-else class='bbbb'><p>123</p></div>
     <!-- <div v-else>123</div> 
      <div class='vvv'>123</div>  -->

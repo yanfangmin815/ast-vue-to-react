@@ -51,10 +51,17 @@ const judgeIfFor = (isAll) => {
 }
 
 // const arr = [1,2,3,4,5,6,7,8]
+// arr.splice(0,1)
+// const arr1 = arr.slice(0,0)
+// const arr2 = arr.slice(0)
+// const result = [0,9,11]
+// console.log([].concat(arr1,result,arr2))
+
+// const arr = [1,2,3,4,5,6,7,8]
 // for(let i=0;i<arr.length;i++) {
 //   console.log(i,'--------',353253245)
 //   if (i == 1) {
-//     i = 5
+//     i++
 //   }
 // }
 

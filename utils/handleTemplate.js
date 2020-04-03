@@ -81,9 +81,10 @@ const handleConditions = (templateAst) => {
     if (item.type == '1') {
       const itemIfConditions = item.ifConditions
       if (itemIfConditions && itemIfConditions.length > 1) {
-        templateAst.children.splice(index,1)
-        const arr1 = templateAst.children.slice(0,index)
-        const arr2 = templateAst.children.slice(index)
+        const i = templateAst.children.indexOf(item)
+        templateAst.children.splice(i,1)
+        const arr1 = templateAst.children.slice(0,i)
+        const arr2 = templateAst.children.slice(i)
         const result = itemIfConditions.map((subItemIfConditions, subIndex) => {
           return subItemIfConditions.block
         })
@@ -91,6 +92,49 @@ const handleConditions = (templateAst) => {
       } 
     }
   })
+}
+
+const handleVIfSingle = (item, attrsMap, chilren) => {
+  const value = attrsMap['v-if']
+  const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
+  delete attrsMap['v-if']
+  const attrsChildSet = handleClassContainer(item)
+  const nodeJsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
+                  t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
+  jsxElement = t.jsxExpressionContainer(t.conditionalExpression(types,nodeJsxElement,t.nullLiteral()))
+  return jsxElement
+}
+
+const handleVIfElseIf = (chilrenNodes, item, itemVIf, attrsMap, attrsMapVIf, chilren) => {
+
+  let jsxElement = handleVIfSingle(item, attrsMap, chilren)
+  chilrenNodes.push(jsxElement)
+ 
+  const valueVIfElseIf = attrsMapVIf['v-else-if']
+  const typesVIfElseIf = isEqualExpression(valueVIfElseIf) ? handleEqualExpression(valueVIfElseIf) : t.identifier(valueVIfElseIf)
+  delete attrsMapVIf['v-else-if']
+  const attrsChildSetVIfElseIf = handleClassContainer(itemVIf)
+  const nodeJsxElementVIfElseIf = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(itemVIf.tag),attrsChildSetVIfElseIf), 
+                  t.jsxClosingElement(t.jsxIdentifier(itemVIf.tag)), chilren)
+  let jsxElementVIfElseIf = t.jsxExpressionContainer(t.conditionalExpression(typesVIfElseIf,nodeJsxElementVIfElseIf,t.nullLiteral()))
+  chilrenNodes.push(jsxElementVIfElseIf)
+  return chilrenNodes
+}
+
+const handleVIfElse = (chilrenNodes, item, itemVIf, attrsMap, attrsMapVIf, chilren) => {
+  const value = attrsMap['v-if']
+  const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
+  delete attrsMap['v-if']
+  const attrsChildSet = handleClassContainer(item)
+  const nodeJsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
+                  t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
+  delete attrsMapVIf['v-else']
+  const attrsChildSetVIfElse = handleClassContainer(itemVIf)
+  const nodeJsxElementVIfElse = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(itemVIf.tag),attrsChildSetVIfElse), 
+                  t.jsxClosingElement(t.jsxIdentifier(itemVIf.tag)), chilren)
+  jsxElement = t.jsxExpressionContainer(t.conditionalExpression(types,nodeJsxElement,nodeJsxElementVIfElse))
+  chilrenNodes.push(jsxElement)
+  return chilrenNodes
 }
 
 const handleToJSXElementSingle = (templateAst) => {
@@ -101,7 +145,9 @@ const handleToJSXElementSingle = (templateAst) => {
     let chilrenNodes = []
     if(templateAst.children && templateAst.children.length){
       for(let i=0;i<templateAst.children.length;i++) {
+        let item = templateAst.children[i]
         let jsxElement
+        let jsxElementVIfElseIf
         let chilren = []
         if (item.children && item.children.length) {
           // 遍历item.children 确认每个children是否都存在ifConditions
@@ -109,35 +155,38 @@ const handleToJSXElementSingle = (templateAst) => {
         }
         if (item.type == '1') {
             if (item.ifConditions) {
+              // console.log(item.ifConditions, ',,,,,,,,,,,,,,,,,')
               const len = item.ifConditions.length
               const attrsMap = item.attrsMap
-              // const { name: { name }, value } = attributes[index]
               switch(len) {
                 case 1:
-                  const value = attrsMap['v-if']
-                  const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
-                  delete attrsMap['v-if']
-                  const attrsChildSet = handleClassContainer(item)
-                  const nodeJsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
-                                  t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
-                  jsxElement = t.jsxExpressionContainer(t.conditionalExpression(types,nodeJsxElement,t.nullLiteral()))
+                  jsxElement = handleVIfSingle(item, attrsMap, chilren)
                 case 2:
-                  const keyArr = Object.keys(attrsMap)
-                  if () {
-                    
+                  const itemVIf = templateAst.children[i+1]
+                  const attrsMapVIf= itemVIf.attrsMap
+                  const keyArr = Object.keys(attrsMapVIf)
+                  if (keyArr.includes('v-else-if')) {
+                    chilrenNodes = handleVIfElseIf(chilrenNodes, item, itemVIf, attrsMap, attrsMapVIf, chilren)
+                  } else if (keyArr.includes('v-else')) {
+                    chilrenNodes = handleVIfElse(chilrenNodes, item, itemVIf, attrsMap, attrsMapVIf, chilren)
                   }
+                  i++
+                // case 3:
+
               }
             } else {
               const attrsChildSet = handleClassContainer(item)
               jsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
                               t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
+              chilrenNodes.push(jsxElement)
             }
         }
         if (item.type == '3') {
           const text = item.text ? item.text : "\n"
           jsxElement = t.jsxText(text)
+          chilrenNodes.push(jsxElement)
         }
-        chilrenNodes.push(jsxElement)
+        // chilrenNodes.push(jsxElement)
       }
     }
     if (!chilrenNodes) {
@@ -147,56 +196,35 @@ const handleToJSXElementSingle = (templateAst) => {
     return {chilrenNodes, jsxElement}
   }
 
-// const handleToJSXElementSingle = (templateAst) => {
-//     const attrsSet = handleClassContainer(templateAst)
-//     let jsxOpeningElement = t.jsxOpeningElement(t.jsxIdentifier(templateAst.tag),attrsSet)
-//     let jsxClosingElement = t.jsxClosingElement(t.jsxIdentifier(templateAst.tag))
-//     handleConditions(templateAst)
-//     let chilrenNodes = templateAst.children.length && templateAst.children.map((item, index) => {
-//         let jsxElement
-//         let chilren = []
-//         if (item.children && item.children.length) {
-//           // 遍历item.children 确认每个children是否都存在ifConditions
-//           chilren = handleToJSXElementSingle(item).chilrenNodes
-//         }
-//         if (item.type == '1') {
-//             if (item.ifConditions) {
-//               const len = item.ifConditions.length
-//               const attrsMap = item.attrsMap
-//               // const { name: { name }, value } = attributes[index]
-//               switch(len) {
-//                 case 1:
-//                   const value = attrsMap['v-if']
-//                   const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
-//                   delete attrsMap['v-if']
-//                   const attrsChildSet = handleClassContainer(item)
-//                   const nodeJsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
-//                                   t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
-//                   jsxElement = t.jsxExpressionContainer(t.conditionalExpression(types,nodeJsxElement,t.nullLiteral()))
-//                 case 2:
-//                   const keyArr = Object.keys(attrsMap)
-//               }
-//             } else {
-//               const attrsChildSet = handleClassContainer(item)
-//               jsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
-//                               t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
-//             }
-//             // const attrsChildSet = handleClassContainer(item)
-//             // jsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
-//             //                 t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
-//         }
-//         if (item.type == '3') {
-//           const text = item.text ? item.text : "\n"
-//           jsxElement = t.jsxText(text)
-//         }
-//         return jsxElement
-//     })
-//     if (!chilrenNodes) {
-//       chilrenNodes = []
-//     }
-//     jsxElement = t.jsxElement(jsxOpeningElement, jsxClosingElement, chilrenNodes)
-//     return {chilrenNodes, jsxElement}
-// }
+const handleToJSXElementSingle1 = (templateAst) => {
+    const attrsSet = handleClassContainer(templateAst)
+    let jsxOpeningElement = t.jsxOpeningElement(t.jsxIdentifier(templateAst.tag),attrsSet)
+    let jsxClosingElement = t.jsxClosingElement(t.jsxIdentifier(templateAst.tag))
+    handleConditions(templateAst)
+    let chilrenNodes = templateAst.children.length && templateAst.children.map((item, index) => {
+        let jsxElement
+        let chilren = []
+        if (item.children && item.children.length) {
+          // 遍历item.children 确认每个children是否都存在ifConditions
+          chilren = handleToJSXElementSingle(item).chilrenNodes
+        }
+        if (item.type == '1') {
+            const attrsChildSet = handleClassContainer(item)
+            jsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
+                            t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
+        }
+        if (item.type == '3') {
+          const text = item.text ? item.text : "\n"
+          jsxElement = t.jsxText(text)
+        }
+        return jsxElement
+    })
+    if (!chilrenNodes) {
+      chilrenNodes = []
+    }
+    jsxElement = t.jsxElement(jsxOpeningElement, jsxClosingElement, chilrenNodes)
+    return {chilrenNodes, jsxElement}
+}
 
 const handleToJSXElement = (templateAst) => {
     // 若为顶级标签元素 弄n套顶级container出来
