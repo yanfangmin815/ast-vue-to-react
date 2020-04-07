@@ -7,9 +7,13 @@
     </ul>  -->
      <!--<input class='inputStyle' v-model='value'/>-->
      <div v-if='a===1'>
-       <p v-if='b===1'><span>gfdgdfgsdf</span></p>
+      <p v-if='b===1'><span>gfdgdfgsdf</span></p>
       <div v-else-if='b===2' class='bbbb'><p>123</p></div>
-      <div v-else class='bbbb'><p>？？？？？？？？？？</p></div>
+      <div v-else-if='b===3' class='eeee'><p>123</p></div>
+      <div v-else-if='b===4' class='bbbb'><p>123</p></div>
+      <div v-else-if='b===5' class='bbbb'><p>123</p></div>
+      <!-- <div v-else-if='b===4' class='bbbb'><p>123</p></div> -->
+      <div v-else class='cccc'><p>1234567890</p></div>
      </div>
      <div v-else class='names'>
        <span>123</span>

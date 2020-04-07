@@ -261,7 +261,6 @@ const handleToJSXElementSingle = (templateAst, ast) => {
           jsxElement = t.jsxText(text)
           chilrenNodes.push(jsxElement)
         }
-        // chilrenNodes.push(jsxElement)
       }
     }
     if (!chilrenNodes) {
@@ -390,7 +389,7 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
       }
     }
   })  
-  cb(ast)
+  // cb(ast)
   return astContent
 }
 

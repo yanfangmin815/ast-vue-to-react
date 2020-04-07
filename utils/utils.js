@@ -1,7 +1,7 @@
 const fs = require('fs')
 const nodePath = require('path')
 const cloneDeep = require('lodash').cloneDeep
-const regIsEqual = /(\w+(\-*|\w*)\w*)(==|===)(\W*\w+\W*)/g // 匹配 str ==|=== val or str ==|=== 'val'
+const regIsEqual = /(\w+(\-*|\w*)\w*)(==|===)(\W*\w+\W*)/ // 匹配 str ==|=== val or str ==|=== 'val'
 
 const tags = ['input','img','']
 
