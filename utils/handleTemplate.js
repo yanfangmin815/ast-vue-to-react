@@ -234,6 +234,7 @@ const handleToJSXElementSingle = (templateAst, ast) => {
                     } else {
                       types = value ? value.indexOf('!') !== '-1' ? t.booleanLiteral(true) : t.booleanLiteral(false) : null
                     }
+                    // 删除指令
                     item.attrsMap['v-if'] && delete item.attrsMap['v-if']
                     item.attrsMap['v-else-if'] && delete item.attrsMap['v-else-if']
                     item.attrsMap.hasOwnProperty('v-else') && delete item.attrsMap['v-else']
@@ -242,6 +243,7 @@ const handleToJSXElementSingle = (templateAst, ast) => {
                         t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren))])
                     arrSwitchCase.push(casees)
                   })
+                  // 添加到ast body体中
                   ast.program.body.push(t.classProperty(t.identifier(functioname),t.arrowFunctionExpression([t.identifier(leftVal)],
                       t.blockStatement([t.switchStatement(t.identifier(leftVal),arrSwitchCase)]))))
                   i+=Number(item.ifConditions.length)
