@@ -6,7 +6,8 @@ const {
   trim,
   isEquals,
   handleFor,
-  judgeIfFor } = require('./utils')
+  judgeIfFor,
+  produceString } = require('./utils')
 const { 
   DEFAULTKIND,
   ONCHANGE,
@@ -18,6 +19,8 @@ const maps = {
 
 let jsxElement
 let jsxElementContainer
+let arrClassName
+
 const handleClass = (templateAst) => {
     for (key in templateAst.attrsMap) {
         if (key === 'class') {
@@ -27,6 +30,24 @@ const handleClass = (templateAst) => {
     }
 }
 
+const getIfCondition = (ifCondition) => {
+  if (isEquals(ifCondition.length, 1)) return 1
+  if (isEquals(ifCondition.length, 2)) return 2
+  if (ifCondition.length >= 3) return 3
+}
+
+const getClassName = (ast) => {
+  let arr = []
+  ast.program.body.some((item,index) => {
+    if (t.isClassDeclaration(item)) {
+      item.body.body.map((subItem,subIndex) => {
+        arr.push(subItem.key.name)
+      })
+      return true
+    }
+  })
+  return arr
+}
 //处理v-show
 const handleVShow = (vals) => {
   const types = isEqualExpression(vals) ? handleEqualExpression(vals) : t.identifier(vals)
@@ -35,7 +56,7 @@ const handleVShow = (vals) => {
                   t.conditionalExpression(types,t.stringLiteral('block'),t.stringLiteral('none')))])))
 }
 
-// 解析二元表达式
+// 解析二元表达式-1
 const handleEqualExpression = (val) => {
   const valNew = trim(val)
   const splitedArr = valNew.split(/(===|==)/)
@@ -43,6 +64,14 @@ const handleEqualExpression = (val) => {
   const operator = splitedArr[1]
   const rightVal = typeof splitedArr[2] === 'string' ? t.stringLiteral(splitedArr[2]) : t.numericLiteral(splitedArr[2])
   return t.binaryExpression(operator,leftVal,rightVal)
+}
+
+// 解析二元表达式-2
+const handleEqualExpressionForValue = (val) => {
+  const valNew = trim(val)
+  const splitedArr = valNew.split(/(===|==)/)
+  const rightVal = typeof splitedArr[2] === 'string' ? t.stringLiteral(splitedArr[2]) : t.numericLiteral(splitedArr[2])
+  return rightVal
 }
 
 // 处理v-if/v-model/v-for
@@ -94,34 +123,34 @@ const handleConditions = (templateAst) => {
   })
 }
 
-const handleVIfSingle = (item, attrsMap, chilren) => {
-  const value = attrsMap['v-if']
+const handleJsxElement = (item, attrsMap, key, chilren) => {
+  const value = attrsMap[key]
   const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
-  delete attrsMap['v-if']
+  delete attrsMap[key]
   const attrsChildSet = handleClassContainer(item)
   const nodeJsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
                   t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
+  return { types, nodeJsxElement }
+}
+
+const handleVIfSingle = (item, attrsMap, key, chilren) => {
+  const { types, nodeJsxElement } = handleJsxElement(item, attrsMap, key, chilren)
   jsxElement = t.jsxExpressionContainer(t.conditionalExpression(types,nodeJsxElement,t.nullLiteral()))
   return jsxElement
 }
 
-const handleVIfElseIf = (chilrenNodes, item, itemVIf, attrsMap, attrsMapVIf, chilren) => {
+const handleVIfElseIf = ({chilrenNodes, item, itemVIf, attrsMap, attrsMapVIf, chilren}) => {
 
-  let jsxElement = handleVIfSingle(item, attrsMap, chilren)
+  let jsxElement = handleVIfSingle(item, attrsMap, 'v-if', chilren)
   chilrenNodes.push(jsxElement)
  
-  const valueVIfElseIf = attrsMapVIf['v-else-if']
-  const typesVIfElseIf = isEqualExpression(valueVIfElseIf) ? handleEqualExpression(valueVIfElseIf) : t.identifier(valueVIfElseIf)
-  delete attrsMapVIf['v-else-if']
-  const attrsChildSetVIfElseIf = handleClassContainer(itemVIf)
-  const nodeJsxElementVIfElseIf = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(itemVIf.tag),attrsChildSetVIfElseIf), 
-                  t.jsxClosingElement(t.jsxIdentifier(itemVIf.tag)), chilren)
-  let jsxElementVIfElseIf = t.jsxExpressionContainer(t.conditionalExpression(typesVIfElseIf,nodeJsxElementVIfElseIf,t.nullLiteral()))
+  let jsxElementVIfElseIf = handleVIfSingle(itemVIf, attrsMapVIf, 'v-else-if', chilren)
   chilrenNodes.push(jsxElementVIfElseIf)
+
   return chilrenNodes
 }
 
-const handleVIfElse = (chilrenNodes, item, itemVIf, attrsMap, attrsMapVIf, chilren) => {
+const handleVIfElse = ({chilrenNodes, item, itemVIf, attrsMap, attrsMapVIf, chilren}) => {
   const value = attrsMap['v-if']
   const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
   delete attrsMap['v-if']
@@ -137,7 +166,7 @@ const handleVIfElse = (chilrenNodes, item, itemVIf, attrsMap, attrsMapVIf, chilr
   return chilrenNodes
 }
 
-const handleToJSXElementSingle = (templateAst) => {
+const handleToJSXElementSingle = (templateAst, ast) => {
     const attrsSet = handleClassContainer(templateAst)
     let jsxOpeningElement = t.jsxOpeningElement(t.jsxIdentifier(templateAst.tag),attrsSet)
     let jsxClosingElement = t.jsxClosingElement(t.jsxIdentifier(templateAst.tag))
@@ -155,24 +184,68 @@ const handleToJSXElementSingle = (templateAst) => {
         }
         if (item.type == '1') {
             if (item.ifConditions) {
-              // console.log(item.ifConditions, ',,,,,,,,,,,,,,,,,')
-              const len = item.ifConditions.length
+              const len = getIfCondition(item.ifConditions)
               const attrsMap = item.attrsMap
               switch(len) {
                 case 1:
-                  jsxElement = handleVIfSingle(item, attrsMap, chilren)
+                  jsxElement = handleVIfSingle(item, attrsMap, 'v-if', chilren)
+                  chilrenNodes.push(jsxElement)
+                  break;
                 case 2:
                   const itemVIf = templateAst.children[i+1]
                   const attrsMapVIf= itemVIf.attrsMap
                   const keyArr = Object.keys(attrsMapVIf)
+                  const afParameter = { chilrenNodes, item, itemVIf, attrsMap, attrsMapVIf, chilren }
                   if (keyArr.includes('v-else-if')) {
-                    chilrenNodes = handleVIfElseIf(chilrenNodes, item, itemVIf, attrsMap, attrsMapVIf, chilren)
+                    chilrenNodes = handleVIfElseIf(afParameter)
                   } else if (keyArr.includes('v-else')) {
-                    chilrenNodes = handleVIfElse(chilrenNodes, item, itemVIf, attrsMap, attrsMapVIf, chilren)
+                    chilrenNodes = handleVIfElse(afParameter)
                   }
                   i++
-                // case 3:
-
+                  break;
+                case 3:
+                  let functioname
+                  let value = attrsMap('v-if')
+                  let arrSwitchCase = []
+                  if (garrClassName.includes(produceString(6))) {
+                    produceString(6)
+                    return
+                  }
+                  arrClassName = getClassName(ast).concat([produceString(6)])
+                  functioname = produceString(6)
+                  const jsxExpressionContainer = t.jsxExpressionContainer(t.callExpression(
+                            t.memberExpression(t.thisExpression(),t.identifier(functioname)),[t.identifier(value)]))
+                  chilrenNodes.push(jsxExpressionContainer)
+                  templateAst.children.slice(i, i+Number(item.ifConditions.length)).map((item,index) => {
+                    let types
+                    if (isEqualExpression(value)) types = handleEqualExpressionForValue(value)
+                    else types = value.indexOf('!') !== '-1' ? t.booleanLiteral(false) : t.booleanLiteral(true)
+                    const attrsChildSet = handleClassContainer(item)
+                    const casees = t.switchCase([t.returnStatement(t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
+                        t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren))],types)
+                    arrSwitchCase.push()
+                  })
+                  ast.program.body.push(t.classProperty(t.identifier(functioname),t.arrowFunctionExpression([t.identifier(value)],
+                      t.blockStatement([t.switchStatement(t.identifier(value),)]))))
+                  // const itemVIf = templateAst.children[i+1]
+                  // const attrsMapVIf= itemVIf.attrsMap
+                  // const itemVIfNext = templateAst.children[i+2]
+                  // const attrsMapVIfNext = itemVIfNext.attrsMap
+                  // const value = attrsMap['v-if']
+                  // const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
+                  // delete attrsMap['v-if']
+                  // const attrsChildSet = handleClassContainer(item)
+                  // const nodeJsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
+                  //                 t.jsxClosingElement(t.jsxIdentifier(item.tag)), chilren)
+                  // const innerValue = 
+                  // const innerConditionalExpression = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
+                  // const conditionalExpression = t.conditionalExpression(types,nodeJsxElement,nodeJsxElementVIfElse)               
+                  // delete attrsMapVIf['v-else']
+                  // const attrsChildSetVIfElse = handleClassContainer(itemVIf)
+                  // const nodeJsxElementVIfElse = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(itemVIf.tag),attrsChildSetVIfElse), 
+                  //                 t.jsxClosingElement(t.jsxIdentifier(itemVIf.tag)), chilren)
+                  // jsxElement = t.jsxExpressionContainer(t.conditionalExpression(types,nodeJsxElement,nodeJsxElementVIfElse))
+                  // chilrenNodes.push(jsxElement)
               }
             } else {
               const attrsChildSet = handleClassContainer(item)
@@ -258,7 +331,9 @@ const removeInstruction = (path, value, key) => {
 
 const handleTemplateAst = (ast, templateAst, filePath, cb) => {
   let astContent
-  handleToJSXElement(templateAst)
+  arrClassName = getClassName(ast)
+
+  handleToJSXElement(templateAst, ast)
   pushToAst(ast)
   // console.log(templateAst)
   traverse(ast, {
@@ -313,7 +388,7 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
       }
     }
   })  
-  cb(ast)
+  // cb(ast)
   return astContent
 }
 

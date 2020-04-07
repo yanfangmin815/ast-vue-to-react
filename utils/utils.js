@@ -50,6 +50,20 @@ const judgeIfFor = (isAll) => {
         || (isAll.includes('v-else-if') && isAll.includes('v-for'))
 }
 
+const produceString = (len) => {
+  　len = len || 6
+    const $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz_'    /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
+    const maxPos = $chars.length
+    const pwd = ''
+    for (i = 0; i < len; i++) {
+      pwd += $chars.charAt(Math.floor(Math.random() * maxPos))
+    }
+    return pwd
+}
+
+const arr = [1,2,3,4,5,6,7,8]
+console.log(arr.slice(0, 0+3))
+
 // const arr = [1,2,3,4,5,6,7,8]
 // arr.splice(0,1)
 // const arr1 = arr.slice(0,0)
@@ -77,5 +91,6 @@ module.exports = {
   cloneDeep,
   handleFor,
   judgeIfFor,
-  tags
+  tags,
+  produceString
 }
