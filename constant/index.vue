@@ -6,16 +6,25 @@
         <li class="div1" v-if='c'></li>
     </ul>  -->
      <!--<input class='inputStyle' v-model='value'/>-->
-    <p v-if='b===1'><span>123</span></p>
-    <div v-else-if='b===3' class='bbbb'><p>123</p></div>
-
+     <div v-if='a===1'>
+       <p v-if='b===1'><span>gfdgdfgsdf</span></p>
+      <div v-else-if='b===2' class='bbbb'><p>123</p></div>
+      <div v-else class='bbbb'><p>？？？？？？？？？？</p></div>
+     </div>
+     <div v-else class='names'>
+       <span>123</span>
+       <span>123</span>
+     </div>
+    <!-- <p v-if='b===1'><span>123</span></p>
+    <div v-else-if='b===2' class='bbbb'><p>123</p></div>
+    <div v-else class='bbbb'><p>123</p></div> -->
     <!-- <p v-if='b===2'><span>123</span></p>
     <div v-else class='bbbb'><p>123</p></div>
 
     <p v-if='b===3'><span>123</span></p> -->
     <!-- <div v-else class='cccc'><p>123</p></div> -->
-    <!-- <div v-else>123</div> 
-     <div class='vvv'>123</div>  -->
+    <!-- <div v-else>123</div>  -->
+     <div class='vvv'>123</div> 
   </div>
   <!-- <div class='cvb' v-else>12345</div> -->
 </template>
