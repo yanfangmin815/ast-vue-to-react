@@ -33,8 +33,10 @@ const isEqualExpression = (val) => {
   return regIsEqual.test(str)
 }
 
-const trim = (str) => {
-  return str.replace(/\s*/g,"")
+const trim = (str, pattern='all') => {
+  if (pattern === 'l') return str.replace(/^\s*/g, "")
+  if (pattern === 'r') return str.replace(/\s*$/g, "")
+  else return str.replace(/\s*/g,"")
 }
 
 const isEquals = (val1,val2) => {
@@ -60,6 +62,10 @@ const produceString = (len) => {
       pwd += $chars.charAt(Math.floor(Math.random() * maxPos))
     }
     return pwd
+}
+
+const handleSuffix = () => {
+  
 }
 
 // const arr = [1,2,3,4,5,6,7,8]

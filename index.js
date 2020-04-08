@@ -8,6 +8,8 @@ const traverse = require("@babel/traverse").default;
 const generator = require('@babel/generator').default; // https://www.babeljs.cn/docs/6.26.3/babel-types
 const t = require('@babel/types');
 const _ = require('lodash');
+const { trim,
+        getBasename } = require('./utils/utils')
 
 const { handleJsAst } = require('./utils/handleScript')
 const { handleTemplateAst } = require('./utils/handleTemplate')
@@ -184,11 +186,11 @@ class AutoTryCatch {
     }
   }
 
-  handleTraverse({ast='', templateAst=''}, filePath='') {
+  handleTraverse({ast='', templateAst='', styles=''}, filePath='') {
       let isChanged = true
       // 如果不符合条件 则不添加try...catch
       if (isChanged) {
-        this.handleAst(ast, templateAst, filePath)
+        this.handleAst(ast, templateAst, styles, filePath)
       }
   }
 
@@ -198,17 +200,18 @@ class AutoTryCatch {
     const component = {
       template: res.template.content,
       js: res.script.content.replace(/\/\/\n/g, ''),
-      styles: res.styles
+      styles: trim(res.styles[0].content, 'l')
     }
     try {
       const ast = babylon.parse(component.js, {
         sourceType: 'module'
       })
       const templateAst = compiler.compile(component.template).ast
-      // console.log(templateAst)
+      const styles = component.styles
+      // console.log(component.styles)
       // console.log(res)
 
-      return {ast,templateAst};
+      return { ast, templateAst, styles };
     } catch (error) {
       console.log(error);
       return null;
@@ -229,13 +232,31 @@ class AutoTryCatch {
       // fs.writeFileSync(filePath, output.code);
   }
 
-  handleAst(ast, templateAst, filePath) {
+  autoWriteFileSyncPure(content='', filePath='') {
+    fs.writeFileSync(filePath, content);
+}
+
+  handleAst(ast, templateAst, styles, filePath) {
     new Promise((reslove,reject) => {
       this.jsAst = handleJsAst(ast, filePath, this.autoWriteFileSync)
       reslove(this.jsAst)
     }).then((data) => {
       // 处理template
-      this.templateAst = handleTemplateAst(data, templateAst, filePath, this.autoWriteFileSync)
+      this.templateAndJsAst = handleTemplateAst(data, templateAst, filePath, this.autoWriteFileSync)
+      const styleName = path.dirname(filePath) + '/' + getBasename(filePath) + '.less'
+      this.autoWriteFileSyncPure(styles, styleName)
+      const importDeclaration = t.importDeclaration([],t.stringLiteral(styleName))
+      const programBody = this.templateAndJsAst.program.body
+      for (let i=0;i<programBody.length;i++) {
+        const item = programBody[i]
+        const itemNext = programBody[i+1]
+        console.log(item.type)
+        if (item.type !== itemNext.type && item.type === 'ImportDeclaration') {
+          programBody.splice(i,0,importDeclaration)
+          break;
+        }
+      }
+      this.autoWriteFileSync(this.templateAndJsAst)
     }, err => {})
   }
 

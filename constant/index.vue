@@ -1,24 +1,32 @@
 <template>
  <!-- class="hello" -->
   <div>
-    <!-- <ul class='ttt' v-if='a'>
-        <li class="div1" v-for='item in arrs'></li>
-        <li class="div1" v-if='c'></li>
-    </ul>  -->
-     <!--<input class='inputStyle' v-model='value'/>-->
-     <div v-if='a===1'>
+     <ul v-if='name===123'>
+        <p v-for='(arr,index) in arrs' v-if='arr===3'>{arr}---{index}</p>
+    </ul>
+    <br/>
+    <ul v-if='name===456'>
+        <p v-for='(arr, index) in arrs'>
+            <span v-if='arr==3'>{arr}</span>
+            <span v-else-if='arr==4'>{arr}---{index}</span>
+            <span v-else-if='arr==5'>{arr}+++{index}</span>
+            <span v-else-if='arr==6'>{arr}.....{index}</span>
+            <span v-else>{arr},,,,,{index}</span>
+        </p>
+    </ul>
+     <!-- <div v-if='a===1'>
       <p v-if='b===1'><span>gfdgdfgsdf</span></p>
       <div v-else-if='b===2' class='bbbb'><p>123</p></div>
       <div v-else-if='b===3' class='eeee'><p>123</p></div>
       <div v-else-if='b===4' class='bbbb'><p>123</p></div>
-      <div v-else-if='b===5' class='bbbb'><p>123</p></div>
+      <div v-else-if='b===5' class='bbbb'><p>123</p></div> -->
       <!-- <div v-else-if='b===4' class='bbbb'><p>123</p></div> -->
-      <div v-else class='cccc'><p>1234567890</p></div>
-     </div>
-     <div v-else class='names'>
+      <!-- <div v-else class='cccc'><p>1234567890</p></div>
+     </div> -->
+     <!-- <div v-else class='names'>
        <span>123</span>
        <span>123</span>
-     </div>
+     </div> -->
     <!-- <p v-if='b===1'><span>123</span></p>
     <div v-else-if='b===2' class='bbbb'><p>123</p></div>
     <div v-else class='bbbb'><p>123</p></div> -->
@@ -36,7 +44,7 @@
 <script>
 import { Dialog, Toast, Table, Tree } from 'i-mayfly';
 import 'i-mayfly/lib/component/table/style/css';
-// import 'i-mayfly/lib/component/dialog/style/css';
+
 export default {
   // name: 'HelloWorld',
   data () {
@@ -68,6 +76,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+@import "@/assets/components/css/main.less";
 h1, h2 {
   font-weight: normal;
 }
