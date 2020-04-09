@@ -4,7 +4,7 @@ const cloneDeep = require('lodash').cloneDeep
 const regIsEqual = /(\w+(\-*|\w*)\w*)(==|===)(\W*\w+\W*)/ // 匹配 str ==|=== val or str ==|=== 'val'
 
 const tags = ['input','img','']
-
+const ifArrs = ['v-if', 'v-else-if', 'v-else']
 const isExist = (path) => {
   return fs.existsSync(path)
 }
@@ -45,12 +45,6 @@ const isEquals = (val1,val2) => {
 
 const handleFor = (forValue) => {
   return forValue.split(/\bin\b/)
-}
-
-const judgeIfFor = (isAll) => {
-  return (isAll.includes('v-if') && isAll.includes('v-for')) 
-        || (isAll.includes('v-else') && isAll.includes('v-for')) 
-        || (isAll.includes('v-else-if') && isAll.includes('v-for'))
 }
 
 const produceString = (len) => {
@@ -97,7 +91,7 @@ module.exports = {
   isEquals,
   cloneDeep,
   handleFor,
-  judgeIfFor,
   tags,
+  ifArrs,
   produceString
 }

@@ -1,44 +1,9 @@
 <template>
- <!-- class="hello" -->
-  <div>
-     <ul v-if='name===123'>
-        <p v-for='(arr,index) in arrs' v-if='arr===3'>{arr}---{index}</p>
-    </ul>
-    <br/>
-    <ul v-if='name===456'>
-        <p v-for='(arr, index) in arrs'>
-            <span v-if='arr==3'>{arr}</span>
-            <span v-else-if='arr==4'>{arr}---{index}</span>
-            <span v-else-if='arr==5'>{arr}+++{index}</span>
-            <span v-else-if='arr==6'>{arr}.....{index}</span>
-            <span v-else>{arr},,,,,{index}</span>
-        </p>
-    </ul>
-     <!-- <div v-if='a===1'>
-      <p v-if='b===1'><span>gfdgdfgsdf</span></p>
-      <div v-else-if='b===2' class='bbbb'><p>123</p></div>
-      <div v-else-if='b===3' class='eeee'><p>123</p></div>
-      <div v-else-if='b===4' class='bbbb'><p>123</p></div>
-      <div v-else-if='b===5' class='bbbb'><p>123</p></div> -->
-      <!-- <div v-else-if='b===4' class='bbbb'><p>123</p></div> -->
-      <!-- <div v-else class='cccc'><p>1234567890</p></div>
-     </div> -->
-     <!-- <div v-else class='names'>
-       <span>123</span>
-       <span>123</span>
-     </div> -->
-    <!-- <p v-if='b===1'><span>123</span></p>
-    <div v-else-if='b===2' class='bbbb'><p>123</p></div>
-    <div v-else class='bbbb'><p>123</p></div> -->
-    <!-- <p v-if='b===2'><span>123</span></p>
-    <div v-else class='bbbb'><p>123</p></div>
-
-    <p v-if='b===3'><span>123</span></p> -->
-    <!-- <div v-else class='cccc'><p>123</p></div> -->
-    <!-- <div v-else>123</div>  -->
+  <div v-if='a===3'>
      <div class='vvv'>123</div> 
   </div>
-  <!-- <div class='cvb' v-else>12345</div> -->
+  <div class='cvb' v-else-if='a===4'>12345</div>
+  <div class='cvb' v-else>12345</div>
 </template>
 
 <script>

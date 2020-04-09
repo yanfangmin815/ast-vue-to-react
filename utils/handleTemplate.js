@@ -6,7 +6,7 @@ const {
   trim,
   isEquals,
   handleFor,
-  judgeIfFor,
+  ifArrs,
   produceString } = require('./utils')
 const { 
   DEFAULTKIND,
@@ -279,12 +279,46 @@ const handleToJSXElement = (templateAst, ast) => {
         return handleToJSXElementSingle(item.block, ast).jsxElement
       })
     } else handleToJSXElementSingle(templateAst, ast)
+}
 
+const recursionForIfStatement = () => {
+    let conditionVal, conditionName
+    let len = jsxElementContainer.length
+    jsxElementContainer.map((jsxElement,jsxIndex) => {
+      jsxElement.some((item,index) => {
+        const { name: { name }, value: { value } } = item
+        if (ifArrs.includes(name)) {
+          conditionName = name
+          conditionVal = value
+          return true
+        }
+      })
+      if (jsxIndex + 1 !== len) {
+        const ifStatement = t.ifStatement(t.binaryExpression(),t.blockStatement(),t.ifStatement())
+      } 
+      if (jsxIndex + 1 === len && conditionName === 'v-else-if') {
+        const ifStatement = t.ifStatement(t.binaryExpression(),t.blockStatement(),null)
+      }
+      if (jsxIndex + 1 === len && conditionName === 'v-else') {
+        const ifStatement = t.ifStatement(t.binaryExpression(),t.blockStatement(),t.blockStatement())
+      }
+    })
 }
 
 const pushToAst = (ast) => {
   if (jsxElementContainer && jsxElementContainer.length) {
-
+    let conditionVal
+    jsxElementContainer.map((jsxElement,jsxIndex) => {
+      console.log(jsxElement.openingElement.attributes, '??????????')
+      jsxElement.some((item,index) => {
+        const { name: { name }, value: { value } } = item
+        if (ifArrs.includes(name)) {
+          conditionVal = value
+          return true
+        }
+      })
+      // const { name: { name }, value: { value } } = 
+    })
   } else {
     ast.program.body.push(t.classMethod(DEFAULTKIND,t.identifier('render'),[],
         t.blockStatement([t.returnStatement(jsxElement)])))

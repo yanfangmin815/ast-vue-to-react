@@ -243,20 +243,20 @@ class AutoTryCatch {
     }).then((data) => {
       // 处理template
       this.templateAndJsAst = handleTemplateAst(data, templateAst, filePath, this.autoWriteFileSync)
-      const styleName = path.dirname(filePath) + '/' + getBasename(filePath) + '.less'
+      const styleName = filePath.replace(/\.vue/,'.less')
+      const jsxFile = filePath.replace(/\.vue/,'.jsx')
       this.autoWriteFileSyncPure(styles, styleName)
-      const importDeclaration = t.importDeclaration([],t.stringLiteral(styleName))
+      const importDeclaration = t.importDeclaration([],t.stringLiteral(path.basename(styleName)))
       const programBody = this.templateAndJsAst.program.body
       for (let i=0;i<programBody.length;i++) {
         const item = programBody[i]
         const itemNext = programBody[i+1]
-        console.log(item.type)
         if (item.type !== itemNext.type && item.type === 'ImportDeclaration') {
-          programBody.splice(i,0,importDeclaration)
+          programBody.splice(i+1,0,importDeclaration)
           break;
         }
       }
-      this.autoWriteFileSync(this.templateAndJsAst)
+      // this.autoWriteFileSync(this.templateAndJsAst, jsxFile)
     }, err => {})
   }
 
