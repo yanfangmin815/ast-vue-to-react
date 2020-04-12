@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from "react";
 import { Dialog, Toast, Table, Tree } from 'i-mayfly';
-import "index.less";
 import 'i-mayfly/lib/component/table/style/css';
+import "index.less";
 
 class Index extends React.Component {
   // name: 'HelloWorld',
@@ -33,25 +33,12 @@ class Index extends React.Component {
   };
 }
 
-ji_Dhd = arr => {
-  switch (arr) {
-    case "3":
-      return <span>{arr}</span>;
-
-    case "4":
-      return <span>{arr}---{index}</span>;
-
-    case "5":
-      return <span>{arr}+++{index}</span>;
-
-    case "6":
-      return <span>{arr}.....{index}</span>;
-
-    default:
-      return <span>{arr},,,,,{index}</span>;
-  }
-};
-
 render() {
-  return <div>{name === "123" ? <ul>{arr === "3" ? this.props.arrs && this.props.arrs.length && this.props.arrs.map((arr,index) => <p>{arr}---{index}</p>) : null}</ul> : null} <br></br> {name === "456" ? <ul>this.props.arrs && this.props.arrs.length && this.props.arrs.map((arr,index) => <p>{this.ji_Dhd(arr)}</p>)</ul> : null} <div className="vvv">123</div></div>;
+  if (a === "3") {
+    return <div><div className="vvv">123</div></div>;
+  } else if (a === "4" || b === "5") {
+    return <div className="cvb">12345</div>;
+  } else {
+    return <div className="cvb">12345</div>;
+  }
 }
