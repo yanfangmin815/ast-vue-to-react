@@ -33,6 +33,10 @@ const isEqualExpression = (val) => {
   return regIsEqual.test(str)
 }
 
+const isLogicalOperatorsExsits = (val) => {
+  return val.indexOf('&&') !== -1 || val.indexOf('||') !== -1
+}
+
 const trim = (str, pattern='all') => {
   if (pattern === 'l') return str.replace(/^\s*/g, "")
   if (pattern === 'r') return str.replace(/\s*$/g, "")
@@ -58,12 +62,26 @@ const produceString = (len) => {
     return pwd
 }
 
-const handleSuffix = () => {
-  
+const splitString = (val) => {
+  const value = val.split(/&&|\|\|/)
+  const arr = val.split(' ').filter((item,index) => {
+    if (item === '&&' || item === '||') return item
+  })
+  value.forEach((val,index) => {
+    value[index] = trim(val)
+  })
+  return { value, arr }
 }
 
+// const str = 'a && b===4 && c===5 || d===6'
+// const arr = str.split(' ').filter((item,index) => {
+//   if (item === '&&' || item === '||') {
+//     return item
+//   }
+// })
+
 // const arr = [1,2,3,4,5,6,7,8]
-// console.log(arr.slice(0, 0+3))
+// console.log(arr)
 
 // const arr = [1,2,3,4,5,6,7,8]
 // arr.splice(0,1)
@@ -93,5 +111,7 @@ module.exports = {
   handleFor,
   tags,
   ifArrs,
-  produceString
+  produceString,
+  isLogicalOperatorsExsits,
+  splitString
 }

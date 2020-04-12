@@ -2,7 +2,7 @@
   <div v-if='a===3'>
      <div class='vvv'>123</div> 
   </div>
-  <div class='cvb' v-else-if='a===4'>12345</div>
+  <div class='cvb' v-else-if='a===4 || b===5'>12345</div>
   <div class='cvb' v-else>12345</div>
 </template>
 

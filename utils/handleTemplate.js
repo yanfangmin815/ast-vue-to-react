@@ -7,7 +7,9 @@ const {
   isEquals,
   handleFor,
   ifArrs,
-  produceString } = require('./utils')
+  produceString,
+  isLogicalOperatorsExsits,
+  splitString } = require('./utils')
 const { 
   DEFAULTKIND,
   ONCHANGE,
@@ -20,6 +22,7 @@ const maps = {
 let jsxElement
 let jsxElementContainer
 let arrClassName
+let ifStatements
 
 const handleClass = (templateAst) => {
     for (key in templateAst.attrsMap) {
@@ -272,7 +275,7 @@ const handleToJSXElementSingle = (templateAst, ast) => {
   }
 
 const handleToJSXElement = (templateAst, ast) => {
-    // 若为顶级标签元素 弄n套顶级container出来
+    // 若为顶级标签元素 new n个顶级container
     const temIfConditions = templateAst.ifConditions
     if (!templateAst.parent && temIfConditions && temIfConditions.length) {
       jsxElementContainer = temIfConditions.map((item,index) => {
@@ -281,48 +284,76 @@ const handleToJSXElement = (templateAst, ast) => {
     } else handleToJSXElementSingle(templateAst, ast)
 }
 
-const recursionForIfStatement = () => {
-    let conditionVal, conditionName
+const otherExpression = (value) => {
+  return isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
+}
+
+const getLogicalExpression = (value) => {
+  const splitResult = splitString(value).value
+  const { arr } = splitString(value)
+  const length = splitResult.length - 1
+  let logicalExpression
+  for (let i=0;i<length;i++) {
+    const first = splitResult[i]
+    const second = splitResult[i+1]
+    let firstVal = isEqualExpression(first) ? handleEqualExpression(first) : t.identifier(first)
+    let secondVal = second ? isEqualExpression(second) ? handleEqualExpression(second) : t.identifier(second) : ''
+    if (!logicalExpression) {
+      logicalExpression = t.logicalExpression(arr[i],firstVal, secondVal) 
+    } else {
+      logicalExpression = t.logicalExpression(arr[i],logicalExpression, secondVal) 
+    }
+  }
+  return logicalExpression
+}
+
+const pushToAst = (ast) => {
+  if (jsxElementContainer && jsxElementContainer.length) {
     let len = jsxElementContainer.length
-    jsxElementContainer.map((jsxElement,jsxIndex) => {
-      jsxElement.some((item,index) => {
-        const { name: { name }, value: { value } } = item
+    let conditionVal, conditionName, testExpression, attributes
+    for(let i=len-1;i>=0;i--) {
+      jsxElement = jsxElementContainer[i]
+      Object.keys(jsxElement).some((item,index) => {
+        attributes = jsxElement.openingElement.attributes
+        const [{ name: { name }, value: { value } }] = attributes
         if (ifArrs.includes(name)) {
           conditionName = name
           conditionVal = value
           return true
         }
       })
-      if (jsxIndex + 1 !== len) {
-        const ifStatement = t.ifStatement(t.binaryExpression(),t.blockStatement(),t.ifStatement())
+      // 获取if条件
+      if (conditionVal) {
+        testExpression = isLogicalOperatorsExsits(conditionVal) ? getLogicalExpression(conditionVal) : otherExpression(conditionVal)
+      }
+      if (i + 1 == len && ifArrs.includes('v-else')) {
+        ifStatements = t.blockStatement([t.returnStatement(jsxElement)])
+      }
+      if (i + 1 == len && ifArrs.includes('v-if-else')) {
+        ifStatements = t.ifStatement(testExpression,t.blockStatement([t.returnStatement(jsxElement)]), null)
+      }
+      if (i + 1 < len) {
+        ifStatements = t.ifStatement(testExpression,t.blockStatement([t.returnStatement(jsxElement)]),ifStatements)
       } 
-      if (jsxIndex + 1 === len && conditionName === 'v-else-if') {
-        const ifStatement = t.ifStatement(t.binaryExpression(),t.blockStatement(),null)
+      for(let index=0;index<attributes.length;index++) {
+        const [{ name: { name }, value: { value } }] = attributes
+        if (ifArrs.includes(name)) {
+          attributes.splice(index,1)
+          break;
+        }
       }
-      if (jsxIndex + 1 === len && conditionName === 'v-else') {
-        const ifStatement = t.ifStatement(t.binaryExpression(),t.blockStatement(),t.blockStatement())
-      }
-    })
+    }
+    const element = [ifStatements]
+    pushToAstBody(ast, element)
+  } else {
+    const element = [t.returnStatement(jsxElement)]
+    pushToAstBody(ast, element)
+  }
 }
 
-const pushToAst = (ast) => {
-  if (jsxElementContainer && jsxElementContainer.length) {
-    let conditionVal
-    jsxElementContainer.map((jsxElement,jsxIndex) => {
-      console.log(jsxElement.openingElement.attributes, '??????????')
-      jsxElement.some((item,index) => {
-        const { name: { name }, value: { value } } = item
-        if (ifArrs.includes(name)) {
-          conditionVal = value
-          return true
-        }
-      })
-      // const { name: { name }, value: { value } } = 
-    })
-  } else {
-    ast.program.body.push(t.classMethod(DEFAULTKIND,t.identifier('render'),[],
-        t.blockStatement([t.returnStatement(jsxElement)])))
-  }
+const pushToAstBody = (ast, element) => {
+  ast.program.body.push(t.classMethod(DEFAULTKIND,t.identifier('render'),[],
+    t.blockStatement(element)))
 }
 
 const removeInstruction = (path, value, key) => {
@@ -392,7 +423,7 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
       }
     }
   })  
-  // cb(ast)
+  cb(ast)
   return ast
 }
 
