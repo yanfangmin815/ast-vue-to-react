@@ -7,6 +7,7 @@ const {
   isEquals,
   handleFor,
   ifArrs,
+  eventNames,
   produceString,
   isLogicalOperatorsExsits,
   splitString } = require('./utils')
@@ -23,6 +24,7 @@ let jsxElement
 let jsxElementContainer
 let arrClassName
 let ifStatements
+let classDeclaration
 
 const handleClass = (templateAst) => {
     for (key in templateAst.attrsMap) {
@@ -30,6 +32,10 @@ const handleClass = (templateAst) => {
             templateAst.attrsMap[maps[key]] = templateAst.attrsMap[key]
             delete templateAst.attrsMap[key]
         }
+        // if (eventNames.hasOwnProperty(key)) {
+        //   templateAst.attrsMap[eventNames[key]] = templateAst.attrsMap[key]
+        //   delete templateAst.attrsMap[key]
+        // }
     }
 }
 
@@ -84,7 +90,7 @@ const handleVIf = (item, vals) => {
 }
 
 const handleClassContainer = (templateAst) => {
-  handleClass(templateAst) // class处理为className
+  handleClass(templateAst) // class处理为className && 处理事件为react标准
   const { attrsMap, ifConditions } = templateAst
   const attrs = Object.keys(attrsMap)
   const attrsSet = attrs.length && attrs.map((item, index) => {
@@ -248,7 +254,7 @@ const handleToJSXElementSingle = (templateAst, ast) => {
                     arrSwitchCase.push(casees)
                   })
                   // 添加到ast body体中
-                  ast.program.body.push(t.classProperty(t.identifier(functioname),t.arrowFunctionExpression([t.identifier(leftVal)],
+                  classDeclaration.body.body.push(t.classProperty(t.identifier(functioname),t.arrowFunctionExpression([t.identifier(leftVal)],
                       t.blockStatement([t.switchStatement(t.identifier(leftVal),arrSwitchCase)]))))
                   i+=conditionLen
                   break;
@@ -272,9 +278,10 @@ const handleToJSXElementSingle = (templateAst, ast) => {
     }
     jsxElement = t.jsxElement(jsxOpeningElement, jsxClosingElement, chilrenNodes)
     return {chilrenNodes, jsxElement}
-  }
+}
 
 const handleToJSXElement = (templateAst, ast) => {
+    getClassDeclaration(ast)
     // 若为顶级标签元素 new n个顶级container
     const temIfConditions = templateAst.ifConditions
     if (!templateAst.parent && temIfConditions && temIfConditions.length) {
@@ -282,6 +289,7 @@ const handleToJSXElement = (templateAst, ast) => {
         return handleToJSXElementSingle(item.block, ast).jsxElement
       })
     } else handleToJSXElementSingle(templateAst, ast)
+    pushToAst(ast)
 }
 
 const otherExpression = (value) => {
@@ -310,14 +318,13 @@ const getLogicalExpression = (value) => {
 const pushToAst = (ast) => {
   if (jsxElementContainer && jsxElementContainer.length) {
     let len = jsxElementContainer.length
-    let conditionVal, conditionName, testExpression, attributes
+    let conditionVal, testExpression, attributes
     for(let i=len-1;i>=0;i--) {
       jsxElement = jsxElementContainer[i]
       Object.keys(jsxElement).some((item,index) => {
         attributes = jsxElement.openingElement.attributes
         const [{ name: { name }, value: { value } }] = attributes
         if (ifArrs.includes(name)) {
-          conditionName = name
           conditionVal = value
           return true
         }
@@ -336,7 +343,7 @@ const pushToAst = (ast) => {
         ifStatements = t.ifStatement(testExpression,t.blockStatement([t.returnStatement(jsxElement)]),ifStatements)
       } 
       for(let index=0;index<attributes.length;index++) {
-        const [{ name: { name }, value: { value } }] = attributes
+        const [{ name: { name } }] = attributes
         if (ifArrs.includes(name)) {
           attributes.splice(index,1)
           break;
@@ -344,15 +351,15 @@ const pushToAst = (ast) => {
       }
     }
     const element = [ifStatements]
-    pushToAstBody(ast, element)
+    pushToAstBody(element)
   } else {
     const element = [t.returnStatement(jsxElement)]
-    pushToAstBody(ast, element)
+    pushToAstBody(element)
   }
 }
 
-const pushToAstBody = (ast, element) => {
-  ast.program.body.push(t.classMethod(DEFAULTKIND,t.identifier('render'),[],
+const pushToAstBody = (element) => {
+  classDeclaration.body.body.push(t.classMethod(DEFAULTKIND,t.identifier('render'),[],
     t.blockStatement(element)))
 }
 
@@ -371,17 +378,22 @@ const getMemberExpression = (val2) => {
     t.identifier(trim(val2)))
 }
 
+const getClassDeclaration = (ast) => {
+  ast.program.body.some((item,index) => {
+    if(t.isClassDeclaration(item)) {
+      classDeclaration = item
+      return true
+    }
+  })
+}
+
 const handleTemplateAst = (ast, templateAst, filePath, cb) => {
   arrClassName = getClassName(ast)
   handleToJSXElement(templateAst, ast)
-  pushToAst(ast)
   traverse(ast, {
     JSXElement(path) {
       const { node } = path
       const attributes = node.openingElement.attributes
-      const isAll = attributes.map((item, index) => {
-        return item.name.name
-      })
       for (let index=0; index<attributes.length; index++) {
         const { name: { name }, value: { value } } = attributes[index]
         // break

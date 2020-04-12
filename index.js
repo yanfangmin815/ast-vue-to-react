@@ -208,7 +208,7 @@ class AutoTryCatch {
       })
       const templateAst = compiler.compile(component.template).ast
       const styles = component.styles
-      // console.log(templateAst)
+      console.log(templateAst)
       // console.log(res)
 
       return { ast, templateAst, styles };
@@ -227,9 +227,9 @@ class AutoTryCatch {
       }
       // 设置输出格式
       const output = generator(ast, config);
-      console.log(output.code, '??????????')
+      // console.log(output.code, '??????????')
 
-      fs.writeFileSync(filePath, output.code);
+      // fs.writeFileSync(filePath, output.code);
   }
 
   autoWriteFileSyncPure(content='', filePath='') {
