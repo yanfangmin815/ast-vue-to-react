@@ -89,13 +89,23 @@ const handleVIf = (item, vals) => {
   return t.jsxAttribute(t.jsxIdentifier(item),t.stringLiteral(vals))
 }
 
+const handleItem = (item) => {
+  if (eventNames.hasOwnProperty(item)) return 'event'
+  else return item
+}
+
+const handleEvent = (item, val) => {
+  return t.jsxAttribute(t.jsxIdentifier(eventNames[item]),t.jsxExpressionContainer())
+}
+
 const handleClassContainer = (templateAst) => {
   handleClass(templateAst) // class处理为className && 处理事件为react标准
   const { attrsMap, ifConditions } = templateAst
   const attrs = Object.keys(attrsMap)
   const attrsSet = attrs.length && attrs.map((item, index) => {
     const vals = attrsMap[item]
-    switch(item) {
+    let instructions = handleItem(item)
+    switch(instructions) {
       case 'className':
         return t.jsxAttribute(t.jsxIdentifier(item), t.stringLiteral(vals))
       case 'v-show':
@@ -110,6 +120,8 @@ const handleClassContainer = (templateAst) => {
         return handleVIf(item,vals) // 放到render里面处理
       case 'v-for':
         return handleVIf(item,vals) // 放到render里面处理
+      case 'event':
+        return handleEvent(item,vals) // 放到render里面处理
     }
   })
   return !attrsSet ? [] : attrsSet

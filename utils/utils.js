@@ -6,18 +6,18 @@ const regIsEqual = /(\w+(\-*|\w*)\w*)(==|===)(\W*\w+\W*)/ // 匹配 str ==|=== v
 const tags = ['input','img','']
 const ifArrs = ['v-if', 'v-else-if', 'v-else']
 const eventNames = {
-  '@click': 'OnClick',
-  '@submit': 'Onubmit',
-  '@scroll': 'OnScroll',
-  '@keyup': 'OnKeyup',
-  '@blur': 'OnBlur',
-  '@focus': 'OnFocus',
-  '@change': 'OnChange',
-  '@dblclick': 'OnDblclick',
-  '@keydown': 'OnKeydown',
-  '@keypress': 'OnKeypress',
-  '@load': 'OnLoad',  
-  '@mousedown': 'OnMousedown'
+  '@click': 'onClick',
+  '@submit': 'onubmit',
+  '@scroll': 'onScroll',
+  '@keyup': 'onKeyup',
+  '@blur': 'onBlur',
+  '@focus': 'onFocus',
+  '@change': 'onChange',
+  '@dblclick': 'onDblclick',
+  '@keydown': 'onKeydown',
+  '@keypress': 'onKeypress',
+  '@load': 'onLoad',  
+  '@mousedown': 'onMousedown'
 }
 const isExist = (path) => {
   return fs.existsSync(path)

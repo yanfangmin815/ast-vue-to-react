@@ -208,7 +208,7 @@ class AutoTryCatch {
       })
       const templateAst = compiler.compile(component.template).ast
       const styles = component.styles
-      console.log(templateAst)
+      // console.log(templateAst)
       // console.log(res)
 
       return { ast, templateAst, styles };
