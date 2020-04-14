@@ -31,22 +31,10 @@ class Index extends React.Component {
   secondMethod = () => {
     console.log('vue method second');
   };
-  cdsmWp = b => {
-    switch (b) {
-      case "1":
-        return <p><span>123</span></p>;
-
-      case "3":
-        return <div className="bbbb"><p>123</p></div>;
-
-      default:
-        return <div className="cccc"><p>123</p></div>;
-    }
-  };
 
   render() {
     {
-      return <div><div className="vvv">123</div> {this.cdsmWp(b)}</div>;
+      return <div onClick={this.clickTap}><div className="vvv">123</div></div>;
     }
   }
 

@@ -10,7 +10,8 @@ const {
   eventNames,
   produceString,
   isLogicalOperatorsExsits,
-  splitString } = require('./utils')
+  splitString,
+  isArgsExist } = require('./utils')
 const { 
   DEFAULTKIND,
   ONCHANGE,
@@ -32,10 +33,6 @@ const handleClass = (templateAst) => {
             templateAst.attrsMap[maps[key]] = templateAst.attrsMap[key]
             delete templateAst.attrsMap[key]
         }
-        // if (eventNames.hasOwnProperty(key)) {
-        //   templateAst.attrsMap[eventNames[key]] = templateAst.attrsMap[key]
-        //   delete templateAst.attrsMap[key]
-        // }
     }
 }
 
@@ -94,8 +91,23 @@ const handleItem = (item) => {
   else return item
 }
 
+const getArgsName = (vals) => {
+  const val = trim(vals)
+  const args = isArgsExist(val) ? val.slice(val.indexOf('(') + 1, val.indexOf(')')).split(',') : ''
+  const name = val.slice(0, val.indexOf('('))
+  return { args, name }
+}
+
 const handleEvent = (item, val) => {
-  return t.jsxAttribute(t.jsxIdentifier(eventNames[item]),t.jsxExpressionContainer())
+  const { args, name } = getArgsName(val)
+  const argArr = args && args.length && args.map((arg, index) => {
+    return t.identifier(arg)
+  })
+  const memberExpression = t.memberExpression(t.thisExpression(), t.identifier(name)) 
+  const expression = isArgsExist(val) === 1 
+  ? memberExpression
+  : t.callExpression(t.memberExpression(memberExpression, t.identifier('bind')),[t.thisExpression(), ...argArr])
+  return t.jsxAttribute(t.jsxIdentifier(eventNames[item]),t.jsxExpressionContainer(expression))
 }
 
 const handleClassContainer = (templateAst) => {

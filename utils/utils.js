@@ -87,6 +87,13 @@ const splitString = (val) => {
   return { value, arr }
 }
 
+const isArgsExist = (val) => {
+  return trim(val).indexOf(')') - trim(val).indexOf('(')
+}
+
+// const str = 'aaa(123,345)'
+// console.log(trim(str).slice(trim(str).indexOf('(') + 1, trim(str).indexOf(')')))
+
 // const str = 'a && b===4 && c===5 || d===6'
 // const arr = str.split(' ').filter((item,index) => {
 //   if (item === '&&' || item === '||') {
@@ -128,5 +135,6 @@ module.exports = {
   eventNames,
   produceString,
   isLogicalOperatorsExsits,
-  splitString
+  splitString,
+  isArgsExist
 }

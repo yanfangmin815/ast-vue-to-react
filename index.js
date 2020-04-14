@@ -197,6 +197,7 @@ class AutoTryCatch {
   getAst(filename) {
     const content = fs.readFileSync(filename, 'utf8')
     const res = compiler.parseComponent(content.toString(), { pad: 'line' });
+    console.log(res.template.content)
     const component = {
       template: res.template.content,
       js: res.script.content.replace(/\/\/\n/g, ''),
@@ -229,7 +230,7 @@ class AutoTryCatch {
       const output = generator(ast, config);
       // console.log(output.code, '??????????')
 
-      // fs.writeFileSync(filePath, output.code);
+      fs.writeFileSync(filePath, output.code);
   }
 
   autoWriteFileSyncPure(content='', filePath='') {
