@@ -122,7 +122,6 @@ class AutoTryCatch {
                       _this.getFile(datas)
                     })
                   } else {
-                    // const path = item + '/' + data[i]
                     const extname = _this.getExtname(path2)
                     if (_this.pattern.includes(extname)) {
                       let astObj = _this.getAst(path2);
@@ -181,8 +180,11 @@ class AutoTryCatch {
   handleChange() {
     return (pathname, stats) => {
       const filePath = this.getReolve(pathname)
-      const astObj = this.getAst(filePath)
-      this.handleTraverse(astObj, filePath)
+      const extname = this.getExtname(filePath)
+      if (this.pattern.includes(extname)) {
+        const astObj = this.getAst(filePath)
+        this.handleTraverse(astObj, filePath)
+      }
     }
   }
 
@@ -197,7 +199,6 @@ class AutoTryCatch {
   getAst(filename) {
     const content = fs.readFileSync(filename, 'utf8')
     const res = compiler.parseComponent(content.toString(), { pad: 'line' });
-    console.log(res.template.content)
     const component = {
       template: res.template.content,
       js: res.script.content.replace(/\/\/\n/g, ''),

@@ -29,6 +29,11 @@ let classDeclaration
 
 const handleClass = (templateAst) => {
     for (key in templateAst.attrsMap) {
+        if (key.indexOf('v-on:') !== -1) {
+          const str = key.replace(/v-on:/, '@')
+          templateAst.attrsMap[str] = templateAst.attrsMap[key]
+          delete templateAst.attrsMap[key]
+        }
         if (key === 'class') {
             templateAst.attrsMap[maps[key]] = templateAst.attrsMap[key]
             delete templateAst.attrsMap[key]
@@ -54,6 +59,7 @@ const getClassName = (ast) => {
   })
   return arr
 }
+
 //处理v-show
 const handleVShow = (vals) => {
   const types = isEqualExpression(vals) ? handleEqualExpression(vals) : t.identifier(vals)
@@ -112,7 +118,7 @@ const handleEvent = (item, val) => {
 
 const handleClassContainer = (templateAst) => {
   handleClass(templateAst) // class处理为className && 处理事件为react标准
-  const { attrsMap, ifConditions } = templateAst
+  const { attrsMap } = templateAst
   const attrs = Object.keys(attrsMap)
   const attrsSet = attrs.length && attrs.map((item, index) => {
     const vals = attrsMap[item]

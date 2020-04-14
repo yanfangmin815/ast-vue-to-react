@@ -1,5 +1,5 @@
 <template>
-  <div v-if='a===4' @click='clickTap()'> 
+  <div v-if='a===4' v-on:click='clickTap(123)'>
      <div class='vvv'>123</div> 
   </div>
   <!-- <div class='cvb' v-else-if='a===4 || b===5'>12345</div>

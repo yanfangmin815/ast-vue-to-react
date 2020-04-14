@@ -34,7 +34,7 @@ class Index extends React.Component {
 
   render() {
     {
-      return <div onClick={this.clickTap}><div className="vvv">123</div></div>;
+      return <div onClick={this.clickTap.bind(this, 123)}><div className="vvv">123</div></div>;
     }
   }
 
