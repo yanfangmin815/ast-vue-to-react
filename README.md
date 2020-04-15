@@ -2,7 +2,7 @@
 ## Introduction
 - transform vue to react via ast
 - webpack plugin
-- 龟速开发
+- 简化版转化插件
 
 ## Install
 
