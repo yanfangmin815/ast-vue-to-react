@@ -8,6 +8,7 @@ const {
   handleFor,
   ifArrs,
   eventNames,
+  selfNames,
   produceString,
   isLogicalOperatorsExsits,
   splitString,
@@ -34,8 +35,9 @@ const handleClass = (templateAst) => {
           templateAst.attrsMap[str] = templateAst.attrsMap[key]
           delete templateAst.attrsMap[key]
         }
-        if (key.indexOf('v-bind:') !== -1) {
-          const str = key.replace(/v-bind:/, '')
+        if (key.indexOf('v-bind:') !== -1 || key.indexOf(':') === 0 ) {
+          const str = key.replace(/v-bind:|:/, '')
+          console.log(str)
           templateAst.attrsMap[str] = templateAst.attrsMap[key]
           delete templateAst.attrsMap[key]
         }
@@ -90,7 +92,8 @@ const handleVIf = (item, vals) => {
 
 const handleItem = (item) => {
   if (eventNames.hasOwnProperty(item)) return 'event'
-  else return item
+  else if (selfNames.includes(item)) return item
+  else return 'custom'
 }
 
 const getArgsName = (vals) => {
@@ -136,6 +139,8 @@ const handleClassContainer = (templateAst) => {
         return handleVIf(item,vals) // 放到render里面处理
       case 'event':
         return handleEvent(item,vals) // 放到render里面处理
+      case 'custom':
+        return handleVIf(item,vals) // 放到render里面处理
     }
   })
   return !attrsSet ? [] : attrsSet

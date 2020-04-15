@@ -19,6 +19,8 @@ const eventNames = {
   '@load': 'onLoad',  
   '@mousedown': 'onMousedown'
 }
+const selfNames = ['className', 'v-show', 'v-if', 'v-else-if', 'v-else', 'v-model', 'v-for']
+  
 const isExist = (path) => {
   return fs.existsSync(path)
 }
@@ -90,10 +92,8 @@ const splitString = (val) => {
 const isArgsExist = (val) => {
   return trim(val).indexOf(')') - trim(val).indexOf('(')
 }
-
-// const str = 'aaa(123,345)'
-// console.log(trim(str).slice(trim(str).indexOf('(') + 1, trim(str).indexOf(')')))
-
+// let key = 'v-bind:fghuio'
+// const str = key.replace(/v-bind:|:/, '')
 // const str = 'a && b===4 && c===5 || d===6'
 // const arr = str.split(' ').filter((item,index) => {
 //   if (item === '&&' || item === '||') {
@@ -102,7 +102,7 @@ const isArgsExist = (val) => {
 // })
 
 // const arr = [1,2,3,4,5,6,7,8]
-// console.log(arr)
+// console.log(str, '?????????????')
 
 // const arr = [1,2,3,4,5,6,7,8]
 // arr.splice(0,1)
@@ -133,6 +133,7 @@ module.exports = {
   tags,
   ifArrs,
   eventNames,
+  selfNames,
   produceString,
   isLogicalOperatorsExsits,
   splitString,
