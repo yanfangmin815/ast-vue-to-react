@@ -34,6 +34,11 @@ const handleClass = (templateAst) => {
           templateAst.attrsMap[str] = templateAst.attrsMap[key]
           delete templateAst.attrsMap[key]
         }
+        if (key.indexOf('v-bind:') !== -1) {
+          const str = key.replace(/v-bind:/, '')
+          templateAst.attrsMap[str] = templateAst.attrsMap[key]
+          delete templateAst.attrsMap[key]
+        }
         if (key === 'class') {
             templateAst.attrsMap[maps[key]] = templateAst.attrsMap[key]
             delete templateAst.attrsMap[key]
