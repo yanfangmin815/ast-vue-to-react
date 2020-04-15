@@ -67,7 +67,7 @@ const getClassName = (ast) => {
 
 //处理v-show
 const handleVShow = (vals) => {
-  const types = isEqualExpression(vals) ? handleEqualExpression(vals) : t.identifier(vals)
+  const types = isEqualExpression(vals) ? handleEqualExpression(vals).binaryExpression : t.identifier(vals)
   return t.jsxAttribute(t.jsxIdentifier('style'), 
             t.jsxExpressionContainer(t.objectExpression([t.objectProperty(t.identifier('display'),
                   t.conditionalExpression(types,t.stringLiteral('block'),t.stringLiteral('none')))])))
@@ -80,16 +80,7 @@ const handleEqualExpression = (val) => {
   const leftVal = t.identifier(splitedArr[0])
   const operator = splitedArr[1]
   const rightVal = typeof splitedArr[2] === 'string' ? t.stringLiteral(splitedArr[2]) : t.numericLiteral(splitedArr[2])
-  return t.binaryExpression(operator,leftVal,rightVal)
-}
-
-// 解析二元表达式-2
-const handleEqualExpressionForValue = (val) => {
-  const valNew = trim(val)
-  const splitedArr = valNew.split(/(===|==)/)
-  const leftVal = splitedArr[0]
-  const rightVal = typeof splitedArr[2] === 'string' ? t.stringLiteral(splitedArr[2]) : t.numericLiteral(splitedArr[2])
-  return { leftVal, rightVal }
+  return {leftVal, rightVal, binaryExpression: t.binaryExpression(operator,leftVal,rightVal)}
 }
 
 // 处理v-if/v-model/v-for
@@ -170,7 +161,7 @@ const handleConditions = (templateAst) => {
 
 const handleJsxElement = (item, attrsMap, key, chilren) => {
   const value = attrsMap[key]
-  const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
+  const types = isEqualExpression(value) ? handleEqualExpression(value).binaryExpression : t.identifier(value)
   delete attrsMap[key]
   const attrsChildSet = handleClassContainer(item)
   const nodeJsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
@@ -197,7 +188,7 @@ const handleVIfElseIf = ({chilrenNodes, item, itemVIf, attrsMap, attrsMapVIf, ch
 
 const handleVIfElse = ({chilrenNodes, item, itemVIf, attrsMap, attrsMapVIf, chilren, chilrenVIf}) => {
   const value = attrsMap['v-if']
-  const types = isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
+  const types = isEqualExpression(value) ? handleEqualExpression(value).binaryExpression : t.identifier(value)
   delete attrsMap['v-if']
   const attrsChildSet = handleClassContainer(item)
   const nodeJsxElement = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(item.tag),attrsChildSet), 
@@ -262,7 +253,7 @@ const handleToJSXElementSingle = (templateAst, ast) => {
                   }
                   arrClassName = getClassName(ast).concat([produceString(6)])
                   functioname = produceString(6)
-                  let { leftVal } = handleEqualExpressionForValue(value)
+                  let { leftVal } = handleEqualExpression(value)
                   const jsxExpressionContainer = t.jsxExpressionContainer(t.callExpression(
                             t.memberExpression(t.thisExpression(),t.identifier(functioname)),[t.identifier(leftVal)]))
                   chilrenNodes.push(jsxExpressionContainer)
@@ -274,7 +265,7 @@ const handleToJSXElementSingle = (templateAst, ast) => {
                     let types
                     let value = item.attrsMap['v-if'] || item.attrsMap['v-else-if'] || item.attrsMap['v-else']
                     if (isEqualExpression(value)) {
-                      let { rightVal } = handleEqualExpressionForValue(value)
+                      let { rightVal } = handleEqualExpression(value)
                       types = rightVal
                     } else {
                       types = value ? value.indexOf('!') !== '-1' ? t.booleanLiteral(true) : t.booleanLiteral(false) : null
@@ -328,7 +319,7 @@ const handleToJSXElement = (templateAst, ast) => {
 }
 
 const otherExpression = (value) => {
-  return isEqualExpression(value) ? handleEqualExpression(value) : t.identifier(value)
+  return isEqualExpression(value) ? handleEqualExpression(value).binaryExpression : t.identifier(value)
 }
 
 const getLogicalExpression = (value) => {
@@ -339,8 +330,8 @@ const getLogicalExpression = (value) => {
   for (let i=0;i<length;i++) {
     const first = splitResult[i]
     const second = splitResult[i+1]
-    let firstVal = isEqualExpression(first) ? handleEqualExpression(first) : t.identifier(first)
-    let secondVal = second ? isEqualExpression(second) ? handleEqualExpression(second) : t.identifier(second) : ''
+    let firstVal = isEqualExpression(first) ? handleEqualExpression(first).binaryExpression : t.identifier(first)
+    let secondVal = second ? isEqualExpression(second) ? handleEqualExpression(second).binaryExpression : t.identifier(second) : ''
     if (!logicalExpression) {
       logicalExpression = t.logicalExpression(arr[i],firstVal, secondVal) 
     } else {
