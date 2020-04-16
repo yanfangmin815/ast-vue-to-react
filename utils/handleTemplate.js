@@ -2,6 +2,8 @@
 const t = require('@babel/types');
 const traverse = require("@babel/traverse").default;
 const { 
+  tags } = require('../config')
+const { 
   isEqualExpression,
   trim,
   isEquals,
@@ -27,6 +29,7 @@ let jsxElementContainer
 let arrClassName
 let ifStatements
 let classDeclaration
+let globalAst
 
 const handleClass = (templateAst) => {
     for (key in templateAst.attrsMap) {
@@ -115,9 +118,33 @@ const handleEvent = (item, val) => {
   return t.jsxAttribute(t.jsxIdentifier(eventNames[item]),t.jsxExpressionContainer(expression))
 }
 
+const handleRef = (tag, item, val) => {
+  return tags.includes(tag) ? handleTag(item, val) :handleComponent(item, val)
+}
+
+// 处理标签ref
+const handleTag = (item, val) => {
+  const programBody = globalAst.program.body
+  for (let i=0;i<programBody.length;i++) {
+    const item = programBody[i]
+    if (t.isClassDeclaration(item)) {
+      const body = item.body.body.body.body
+      break
+    }
+  }
+  return t.jsxAttribute(t.jsxIdentifier(item),
+      t.jsxExpressionContainer(t.memberExpression(t.thisExpression(),t.identifier(val))))
+}
+
+// 处理组件ref
+const handleComponent = (item, val) => {
+
+}
+
+
 const handleClassContainer = (templateAst) => {
   handleClass(templateAst) // class处理为className && 处理事件为react标准
-  const { attrsMap } = templateAst
+  const { attrsMap, tag } = templateAst
   const attrs = Object.keys(attrsMap)
   const attrsSet = attrs.length && attrs.map((item, index) => {
     const vals = attrsMap[item]
@@ -141,6 +168,8 @@ const handleClassContainer = (templateAst) => {
         return handleEvent(item,vals) // 放到render里面处理
       case 'custom':
         return handleVIf(item,vals) // 放到render里面处理
+      // case 'ref':
+      //   return handleRef(tag,item,vals) // 放到render里面处理
     }
   })
   return !attrsSet ? [] : attrsSet
@@ -419,6 +448,7 @@ const getClassDeclaration = (ast) => {
 }
 
 const handleTemplateAst = (ast, templateAst, filePath, cb) => {
+  globalAst = ast
   arrClassName = getClassName(ast)
   handleToJSXElement(templateAst, ast)
   traverse(ast, {
@@ -466,7 +496,7 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
       }
     }
   })  
-  // cb(ast)
+  cb(ast)
   return ast
 }
 

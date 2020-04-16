@@ -19,7 +19,7 @@ const eventNames = {
   '@load': 'onLoad',  
   '@mousedown': 'onMousedown'
 }
-const selfNames = ['className', 'v-show', 'v-if', 'v-else-if', 'v-else', 'v-model', 'v-for']
+const selfNames = ['className', 'v-show', 'v-if', 'v-else-if', 'v-else', 'v-model', 'v-for', 'ref']
   
 const isExist = (path) => {
   return fs.existsSync(path)

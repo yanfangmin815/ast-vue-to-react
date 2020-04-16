@@ -1,6 +1,8 @@
 
 import React, {Component, PropTypes} from 'react';
 // import { Dialog, Toast, Table, Tree } from 'i-mayfly';
+import { CustomTextInput } from './aaa'
+
 class Index extends React.Component {
     constructor(props) {
         super(props);
@@ -12,6 +14,10 @@ class Index extends React.Component {
               },
             msg: 'Welcome to Your Vue.js App'
         }
+        this.setTextInputRef = element => {
+          this.textInput = element;
+          console.log(element, '?????????????????')
+      };
     }
 
     componentWillMount() {
@@ -31,10 +37,11 @@ class Index extends React.Component {
           } else if (a===3) {
          return(
           <div class="hello">
-              <ul v-show='a' class='ttt'>
+            <ul v-show='a' class='ttt'>
                 <li class="div1"></li>
             </ul>
-            <input class='inputStyle'/>
+            <input class='inputStyle' ref={this.setTextInputRef}/>
+            <CustomTextInput inputRef={el => this.inputElement = el}/>
            <p v-if='b===2'>123</p>
            <p v-else>321</p>
            {b===2?<p>123</p>:<p>321</p>}</div>

@@ -28,8 +28,8 @@
  - beforeDestroy: ‘componentWillUnmount’,
  - errorCaptured: ‘componentDidCatch’,
  - template => render
- - style => index.(css | stylus | sass | less) 
- - this.$refs(待实现)
+ - style => index.(less) => css | stylus | sass | (待实现)
+ - this.$refs
  - v-for v-if v-show 同时存在的情况
 
 ## Options

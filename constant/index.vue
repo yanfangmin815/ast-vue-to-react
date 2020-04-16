@@ -1,9 +1,8 @@
 <template>
   <div v-if='a===4' v-on:blur='clickTap' :property='a?abcdefg:2' >
      <div class='vvv'>123</div> 
+       
   </div>
-  <!-- <div class='cvb' v-else-if='a===4 || b===5'>12345</div>
-  <div class='cvb' v-else>12345</div> -->
 </template>
 
 <script>
