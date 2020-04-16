@@ -258,8 +258,6 @@ class AutoTryCatch {
           break;
         }
       }
-      console.log(jsxFile, '??????????????')
-
       this.autoWriteFileSync(this.templateAndJsAst, jsxFile)
     }, err => {})
   }
