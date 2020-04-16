@@ -13,6 +13,11 @@ class Index extends React.Component {
       },
       msg: 'Welcome to Your Vue.js App'
     };
+    this.$refs = {};
+
+    this.setTextInputRef = e => {
+      this.$refs.setTextInputRef = e;
+    };
   }
 
   componentDidMount() {
@@ -34,7 +39,11 @@ class Index extends React.Component {
 
   render() {
     {
-      return <div onBlur={this.clickTa.bind(this)} property="a?abcdefg:2"><div className="vvv">123</div></div>;
+      return <div onBlur={this.clickTa.bind(this)} property="a?abcdefg:2">
+        <div className="vvv">123</div> 
+        <input ref={this.setTextInputRef} className="inputStyle"></input> 
+        <CustomTextInput inputElement={el => this.inputElement = el}></CustomTextInput>
+        </div>;
     }
   }
 

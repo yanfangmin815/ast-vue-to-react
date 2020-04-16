@@ -3,7 +3,6 @@ const nodePath = require('path')
 const cloneDeep = require('lodash').cloneDeep
 const regIsEqual = /(\w+(\-*|\w*)\w*)(==|===)(\W*\w+\W*)/ // 匹配 str ==|=== val or str ==|=== 'val'
 
-const tags = ['input','img','']
 const ifArrs = ['v-if', 'v-else-if', 'v-else']
 const eventNames = {
   '@click': 'onClick',
@@ -130,7 +129,6 @@ module.exports = {
   isEquals,
   cloneDeep,
   handleFor,
-  tags,
   ifArrs,
   eventNames,
   selfNames,

@@ -1,7 +1,8 @@
 <template>
   <div v-if='a===4' v-on:blur='clickTap' :property='a?abcdefg:2' >
      <div class='vvv'>123</div> 
-       
+     <input class='inputStyle' ref='setTextInputRef'/>
+     <CustomTextInput ref='inputElement'/>
   </div>
 </template>
 

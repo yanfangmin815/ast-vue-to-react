@@ -40,7 +40,6 @@ const handleClass = (templateAst) => {
         }
         if (key.indexOf('v-bind:') !== -1 || key.indexOf(':') === 0 ) {
           const str = key.replace(/v-bind:|:/, '')
-          console.log(str)
           templateAst.attrsMap[str] = templateAst.attrsMap[key]
           delete templateAst.attrsMap[key]
         }
@@ -122,23 +121,47 @@ const handleRef = (tag, item, val) => {
   return tags.includes(tag) ? handleTag(item, val) :handleComponent(item, val)
 }
 
+const getMemberExpressionSingle = (val) => {
+  return t.memberExpression(t.thisExpression(),t.identifier(val))
+}
+
 // 处理标签ref
 const handleTag = (item, val) => {
+  let bool = false
   const programBody = globalAst.program.body
   for (let i=0;i<programBody.length;i++) {
     const item = programBody[i]
     if (t.isClassDeclaration(item)) {
-      const body = item.body.body.body.body
-      break
+      const body = item.body.body
+      body.some((b,i) => {
+        const bBody = b.body.body
+        if (t.isClassMethod(b) && isEquals(b.kind, 'constructor')) {
+          const expressionStatementObj = t.expressionStatement(t.assignmentExpression('=', 
+          getMemberExpressionSingle('$refs'), t.objectExpression([])))
+          const expressionStatement = t.expressionStatement(t.assignmentExpression(
+                '=', getMemberExpressionSingle(val), 
+                t.arrowFunctionExpression([t.identifier('e')], t.blockStatement([
+                t.expressionStatement(t.assignmentExpression('=', 
+                t.memberExpression(getMemberExpressionSingle('$refs'), t.identifier(val)), t.identifier('e')))
+              ]))))
+          bBody.push(expressionStatementObj)
+          bBody.push(expressionStatement)
+          bool = true
+          return true
+        }
+      })
     }
+    if(bool) break; 
   }
-  return t.jsxAttribute(t.jsxIdentifier(item),
-      t.jsxExpressionContainer(t.memberExpression(t.thisExpression(),t.identifier(val))))
+  return t.jsxAttribute(t.jsxIdentifier(item), t.jsxExpressionContainer(getMemberExpressionSingle(val)))
 }
 
 // 处理组件ref
 const handleComponent = (item, val) => {
-
+  const jsxIdentifier = t.jsxIdentifier(val)
+  const jsxExpressionContainer = t.jsxExpressionContainer(t.arrowFunctionExpression([t.identifier('el')],
+      t.assignmentExpression('=', getMemberExpressionSingle(val), t.identifier('el'))))
+  return t.jsxAttribute(jsxIdentifier, jsxExpressionContainer)
 }
 
 
@@ -168,8 +191,8 @@ const handleClassContainer = (templateAst) => {
         return handleEvent(item,vals) // 放到render里面处理
       case 'custom':
         return handleVIf(item,vals) // 放到render里面处理
-      // case 'ref':
-      //   return handleRef(tag,item,vals) // 放到render里面处理
+      case 'ref':
+        return handleRef(tag,item,vals) // 放到render里面处理
     }
   })
   return !attrsSet ? [] : attrsSet
@@ -289,7 +312,7 @@ const handleToJSXElementSingle = (templateAst, ast) => {
                   functioname = produceString(6)
                   let { leftVal } = handleEqualExpression(value)
                   const jsxExpressionContainer = t.jsxExpressionContainer(t.callExpression(
-                            t.memberExpression(t.thisExpression(),t.identifier(functioname)),[t.identifier(leftVal)]))
+                    getMemberExpressionSingle(functioname),[t.identifier(leftVal)]))
                   chilrenNodes.push(jsxExpressionContainer)
                   templateAst.children.slice(i, i+conditionLen).map((item,index) => {
                     if (item.children && item.children.length) {
@@ -496,7 +519,7 @@ const handleTemplateAst = (ast, templateAst, filePath, cb) => {
       }
     }
   })  
-  cb(ast)
+  // cb(ast)
   return ast
 }
 

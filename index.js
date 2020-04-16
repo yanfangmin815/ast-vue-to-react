@@ -231,7 +231,7 @@ class AutoTryCatch {
       const output = generator(ast, config);
       // console.log(output.code, '??????????')
 
-      // fs.writeFileSync(filePath, output.code);
+      fs.writeFileSync(filePath, output.code);
   }
 
   autoWriteFileSyncPure(content='', filePath='') {
@@ -258,6 +258,8 @@ class AutoTryCatch {
           break;
         }
       }
+      console.log(jsxFile, '??????????????')
+
       this.autoWriteFileSync(this.templateAndJsAst, jsxFile)
     }, err => {})
   }
