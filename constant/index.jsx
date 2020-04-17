@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from "react";
 import { Dialog, Toast, Table, Tree } from 'i-mayfly';
 import 'i-mayfly/lib/component/table/style/css';
-import "index.less";
+import "index..styl";
 
 class Index extends React.Component {
   // name: 'HelloWorld',
@@ -39,11 +39,7 @@ class Index extends React.Component {
 
   render() {
     {
-      return <div onBlur={this.clickTa.bind(this)} property="a?abcdefg:2">
-        <div className="vvv">123</div> 
-        <input ref={this.setTextInputRef} className="inputStyle"></input> 
-        <CustomTextInput inputElement={el => this.inputElement = el}></CustomTextInput>
-        </div>;
+      return <div onBlur={this.clickTa.bind(this)} property="a?abcdefg:2"><div className="vvv">123</div> <input ref={this.setTextInputRef} className="inputStyle"></input> <CustomTextInput inputElement={el => this.inputElement = el}></CustomTextInput></div>;
     }
   }
 

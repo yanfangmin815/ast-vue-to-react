@@ -10,7 +10,7 @@ const t = require('@babel/types');
 const _ = require('lodash');
 const { trim,
         getBasename } = require('./utils/utils')
-
+const { suffix } = require('./config')
 const { handleJsAst } = require('./utils/handleScript')
 const { handleTemplateAst } = require('./utils/handleTemplate')
 
@@ -188,11 +188,11 @@ class AutoTryCatch {
     }
   }
 
-  handleTraverse({ast='', templateAst='', styles=''}, filePath='') {
+  handleTraverse({ast='', templateAst='', styles='', lang=''}, filePath='') {
       let isChanged = true
       // 如果不符合条件 则不添加try...catch
       if (isChanged) {
-        this.handleAst(ast, templateAst, styles, filePath)
+        this.handleAst(ast, templateAst, styles, lang, filePath)
       }
   }
 
@@ -202,18 +202,19 @@ class AutoTryCatch {
     const component = {
       template: res.template.content,
       js: res.script.content.replace(/\/\/\n/g, ''),
-      styles: trim(res.styles[0].content, 'l')
+      styles: trim(res.styles[0].content, 'l'),
+      lang: res.styles[0].attrs.lang ? res.styles[0].attrs.lang :'css'
     }
     try {
       const ast = babylon.parse(component.js, {
         sourceType: 'module'
       })
       const templateAst = compiler.compile(component.template).ast
-      const styles = component.styles
-      // console.log(templateAst)
+      let { styles, lang } = component
+      // console.log(res.styles[0].attrs)
       // console.log(res)
-
-      return { ast, templateAst, styles };
+      lang = suffix[lang]
+      return { ast, templateAst, styles, lang };
     } catch (error) {
       console.log(error);
       return null;
@@ -238,15 +239,17 @@ class AutoTryCatch {
     fs.writeFileSync(filePath, content);
 }
 
-  handleAst(ast, templateAst, styles, filePath) {
+  handleAst(ast, templateAst, styles, lang, filePath) {
     new Promise((reslove,reject) => {
       this.jsAst = handleJsAst(ast, filePath, this.autoWriteFileSync)
       reslove(this.jsAst)
     }).then((data) => {
       // 处理template
+      const suffix = `.${lang}`
+      console.log(lang)
       this.templateAndJsAst = handleTemplateAst(data, templateAst, filePath, this.autoWriteFileSync)
-      const styleName = filePath.replace(/\.vue/,'.less')
-      const jsxFile = filePath.replace(/\.vue/,'.jsx')
+      const styleName = filePath.replace(/\.vue/, suffix)
+      const jsxFile = filePath.replace(/\.vue/, '.jsx')
       this.autoWriteFileSyncPure(styles, styleName)
       const importDeclaration = t.importDeclaration([],t.stringLiteral(path.basename(styleName)))
       const programBody = this.templateAndJsAst.program.body
