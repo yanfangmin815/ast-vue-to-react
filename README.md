@@ -33,4 +33,4 @@
  - v-for/v-if/v-else-if/v-else 同时存在
 
 ## Options
-- 由于vue与react语法存在某些地方的不可融合性，因此如果完全使用ast的方式相互转化，工作量会非常大
+- 由于vue与react语法在某些地方转化不可控，因此如果完全使用ast的方式，可能无法满足需求
