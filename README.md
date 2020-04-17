@@ -11,7 +11,7 @@
  - v-if/v-else-if/v-else
  - v-for
  - v-show
- - v-bind v-bind:attr.sync = xxx>
+ - v-bind
  - emiterName={(new) => this.setState({xxx:new})
  - v-model
  - v-on
@@ -30,7 +30,7 @@
  - template => render
  - style => index.(less | css | styl | scss | ) 
  - this.$refs
- - v-for v-if/v-else-if/v-else 同时存在
+ - v-for/v-if/v-else-if/v-else 同时存在
 
 ## Options
 - 由于vue与react语法存在某些地方的不可融合性，因此如果完全使用ast的方式相互转化，工作量会非常大
